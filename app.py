@@ -10,7 +10,7 @@ result = collection.find()
 
 # Mostrar los documentos en la interfaz de Streamlit
 st.title("Documentos de la Base de Datos MongoDB")
-
+st.write(st.secrets["mongodb_connection_string"])
 # Crear un contenedor para mostrar los documentos
 if result:
     st.write("Aquí están los documentos encontrados en la colección:")
