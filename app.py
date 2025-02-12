@@ -6,6 +6,19 @@ mongodb_connection_string = st.secrets["mongodb_connection_string"]
 client = MongoClient(mongodb_connection_string)
 db = client["mongodb"]
 collection = db["computers"]  # Colección donde están los datos de los ordenadores
+def show_all_documents():
+    # Encuentra todos los documentos en la colección
+    documents = collection.find()
+    
+    # Mostrar los documentos en Streamlit
+    for document in documents:
+        st.write(document)
+
+# Mostrar la base de datos completa antes de la consulta
+st.title("Base de Datos de Ordenadores")
+st.subheader("Todos los documentos en la base de datos:")
+
+show_all_documents()
 
 # Función para consultar la base de datos y obtener información de los ordenadores
 def get_computer_info(query):
