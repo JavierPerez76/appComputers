@@ -4,7 +4,7 @@ from pymongo import MongoClient
 # Conexión a la base de datos MongoDB utilizando los secretos de Streamlit
 mongodb_connection_string = st.secrets["mongodb_connection_string"]
 client = MongoClient(mongodb_connection_string)
-db = client["nombre_de_tu_base_de_datos"]
+db = client["mongodb"]
 collection = db["computers"]  # Colección donde están los datos de los ordenadores
 
 # Función para consultar la base de datos y obtener información de los ordenadores
