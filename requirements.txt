@@ -1,0 +1,5 @@
+streamlit
+python-dotenv
+azure-core
+azure-ai-language-questionanswering
+azure-ai-language-conversations
