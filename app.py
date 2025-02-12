@@ -15,11 +15,11 @@ azure_key = st.secrets["azure_key"]
 azure_client = ConversationAnalysisClient(endpoint=azure_endpoint, credential=AzureKeyCredential(azure_key))
 
 # Función para consultar la base de datos y obtener información de los ordenadores
-def get_computer_info(query):
-    # Realizar la consulta en MongoDB según la pregunta (puedes personalizar esto)
-    computer_info = collection.find_one({"nombre": {"$regex": query, "$options": "i"}})
+def get_computer_info(query_params):
+    # Realizar la consulta en MongoDB con los parámetros de la consulta
+    computer_info = collection.find(query_params)
     if computer_info:
-        return f"Información del ordenador: {computer_info}"
+        return computer_info
     else:
         return "No se encontró información relacionada con la consulta."
 
@@ -66,10 +66,24 @@ if user_query:
         st.subheader("Entidades Reconocidas:")
         st.write(entities)
     
+    # Crear un diccionario para la consulta
+    query_params = {}
+
+    # Analizar las entidades para crear la consulta
+    for entity in entities:
+        if entity["category"] == "RAM":
+            query_params["ram"] = entity["text"]
+        elif entity["category"] == "precio":
+            query_params["precio"] = {"$lte": float(entity["text"].replace("€", "").strip())}
+        elif entity["category"] == "marca":
+            query_params["marca"] = {"$regex": entity["text"], "$options": "i"}
+    
+    # Mostrar la consulta que se está realizando
+    st.subheader(f"Consulta generada a MongoDB: {query_params}")
+
     # Consultar la base de datos para obtener información del ordenador basado en la intención
-    if top_intent == "comprar":  # Ejemplo: Si la intención es comprar
-        # Aquí puedes ajustar la consulta a MongoDB según lo que el usuario pregunte
-        computer_info = get_computer_info(user_query)
+    if top_intent == "comprar":  # Si la intención es comprar
+        computer_info = get_computer_info(query_params)
         st.write(computer_info)
     else:
         st.write("Por favor, formula una consulta válida relacionada con la compra de un ordenador.")
