@@ -25,7 +25,7 @@ def main():
 
         if user_input:
             # Crear un cliente para el modelo del servicio de lenguaje
-            client = ConversationAnalysisClient(
+            language_client = ConversationAnalysisClient(
                 ls_prediction_endpoint, AzureKeyCredential(ls_prediction_key)
             )
 
@@ -33,9 +33,8 @@ def main():
             cls_project = 'OrdenadoresConversational'
             deployment_slot = 'IntentOrdenadores'
 
-            with client:
-                query = user_input
-                result = client.analyze_conversation(
+            with language_client:
+                result = language_client.analyze_conversation(
                     task={
                         "kind": "Conversation",
                         "analysisInput": {
@@ -44,7 +43,7 @@ def main():
                                 "id": "1",
                                 "modality": "text",
                                 "language": "es",
-                                "text": query
+                                "text": user_input
                             },
                             "isLoggingEnabled": False
                         },
@@ -59,7 +58,7 @@ def main():
             top_intent = result["result"]["prediction"]["topIntent"]
             entities = result["result"]["prediction"]["entities"]
 
-            # Mostrar entidades en la terminal
+            # Mostrar entidades detectadas en la terminal
             print("Entidades detectadas:")
             for entity in entities:
                 print(f"Categoría: {entity['category']}, Texto: {entity['text']}")
@@ -70,25 +69,28 @@ def main():
 
             for entity in entities:
                 if entity["category"] == "pulgadas":
-                    pulgadas = entity["text"]
+                    pulgadas = str(entity["text"])  # Asegurar que sea string
                 elif entity["category"] == "marca":
-                    marca = entity["text"]
+                    marca = str(entity["text"])  # Asegurar que sea string
 
             # Construir la consulta para MongoDB
             query = {}
             if pulgadas:
-                query["Pulgadas"] = pulgadas
+                query["Pulgadas"] = pulgadas  # Clave como string
             if marca:
-                query["Marca"] = marca
+                query["Marca"] = marca  # Clave como string
+
+            # Mostrar la consulta en la terminal para depuración
+            print("Consulta generada para MongoDB:", query)
 
             # Consultar en MongoDB
             results = list(collection.find(query))
 
-            # Mostrar resultados
+            # Mostrar resultados en Streamlit
             if results:
                 st.write("Ordenadores encontrados:")
                 for doc in results:
-                    st.write(doc)
+                    st.json(doc)  # Mostrar en formato JSON más legible
             else:
                 st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
 
