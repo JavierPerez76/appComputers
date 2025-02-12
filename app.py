@@ -1,7 +1,7 @@
 import streamlit as st
 from pymongo import MongoClient
 
-client = MongoClient(st.secrets["mongodb_connection_string"])
+client = MongoClient(st.secrets["mongodb"]["mongodb_connection_string"])
 db = client['mongodb']  # Cambia por el nombre de tu base de datos
 collection = db['computers']  # Cambia por el nombre de tu colección
 
