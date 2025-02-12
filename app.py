@@ -1,68 +1,99 @@
 import streamlit as st
+from dotenv import load_dotenv
+import os
 from pymongo import MongoClient
+from azure.core.credentials import AzureKeyCredential
+from azure.ai.language.conversations import ConversationAnalysisClient
 
-client = MongoClient(st.secrets["mongodb"]["mongodb_connection_string"])
-db = client['mongodb']  # Cambia por el nombre de tu base de datos
-collection = db['computers']  # Cambia por el nombre de tu colección
+def main():
+    try:
+        # Cargar variables de entorno
+        load_dotenv()
+        ls_prediction_endpoint = os.getenv('LS_CONVERSATIONS_ENDPOINT')
+        ls_prediction_key = os.getenv('LS_CONVERSATIONS_KEY')
+        mongodb_connection_string = os.getenv('MONGODB_CONNECTION_STRING')
 
+        # Conectar a MongoDB
+        client = MongoClient(mongodb_connection_string)
+        db = client["OrdenadoresDB"]
+        collection = db["Especificaciones"]
 
-result = collection.find()
+        st.title("Buscador de Ordenadores")
 
-# Mostrar los documentos en la interfaz de Streamlit
-st.title("Documentos de la Base de Datos MongoDB")
-# Crear un contenedor para mostrar los documentos
-if result:
-    st.write("Aquí están los documentos encontrados en la colección:")
-    for document in result:
-        st.write(document)
-else:
-    st.write("No se encontraron documentos.")
+        # Pedir entrada al usuario
+        user_input = st.text_input("¿Qué tipo de ordenador buscas?", "")
 
-# # Conexión a la base de datos MongoDB utilizando los secretos de Streamlit
-# mongodb_connection_string = st.secrets["mongodb_connection_string"]
-# client = MongoClient(mongodb_connection_string)
-# db = client["mongodb"]
-# collection = db["computers"]  # Colección donde están los datos de los ordenadores
-# def show_all_documents():
-#     # Encuentra todos los documentos en la colección
-#     documents = collection.find()
-    
-#     # Mostrar los documentos en Streamlit
-#     for document in documents:
-#         st.write(document)
+        if user_input:
+            # Crear un cliente para el modelo del servicio de lenguaje
+            client = ConversationAnalysisClient(
+                ls_prediction_endpoint, AzureKeyCredential(ls_prediction_key)
+            )
 
-# # Mostrar la base de datos completa antes de la consulta
-# st.title("Base de Datos de Ordenadores")
-# st.subheader("Todos los documentos en la base de datos:")
+            # Llamar al modelo del servicio de lenguaje para obtener la intención y entidades
+            cls_project = 'OrdenadoresConversational'
+            deployment_slot = 'IntentOrdenadores'
 
-# show_all_documents()
+            with client:
+                query = user_input
+                result = client.analyze_conversation(
+                    task={
+                        "kind": "Conversation",
+                        "analysisInput": {
+                            "conversationItem": {
+                                "participantId": "1",
+                                "id": "1",
+                                "modality": "text",
+                                "language": "es",
+                                "text": query
+                            },
+                            "isLoggingEnabled": False
+                        },
+                        "parameters": {
+                            "projectName": cls_project,
+                            "deploymentName": deployment_slot,
+                            "verbose": True
+                        }
+                    }
+                )
 
-# # Función para consultar la base de datos y obtener información de los ordenadores
-# def get_computer_info(query):
-#     # Realizar la consulta en MongoDB utilizando la cadena de búsqueda del usuario
-#     computer_info = collection.find({"$text": {"$search": query}})
-#     computer_list = list(computer_info)  # Convertir el cursor en lista
-#     if computer_list:
-#         return computer_list
-#     else:
-#         return "No se encontró información relacionada con la consulta."
+            top_intent = result["result"]["prediction"]["topIntent"]
+            entities = result["result"]["prediction"]["entities"]
 
-# # Interfaz de Streamlit
-# st.title("Consulta de Ordenadores")
+            # Mostrar entidades en la terminal
+            print("Entidades detectadas:")
+            for entity in entities:
+                print(f"Categoría: {entity['category']}, Texto: {entity['text']}")
 
-# # Input del usuario
-# user_query = st.text_input("¿Qué quieres saber sobre los ordenadores?", "")
+            # Extraer pulgadas y marca de las entidades
+            pulgadas = None
+            marca = None
 
-# if user_query:
-#     # Mostrar la consulta que se está realizando
-#     st.subheader(f"Realizando la consulta: {user_query}")
-    
-#     # Consultar la base de datos para obtener información
-#     computer_info = get_computer_info(user_query)
-    
-#     if isinstance(computer_info, list):
-#         st.subheader("Resultados de la consulta:")
-#         for computer in computer_info:
-#             st.write(computer)
-#     else:
-#         st.write(computer_info)
+            for entity in entities:
+                if entity["category"] == "pulgadas":
+                    pulgadas = entity["text"]
+                elif entity["category"] == "marca":
+                    marca = entity["text"]
+
+            # Construir la consulta para MongoDB
+            query = {}
+            if pulgadas:
+                query["Pulgadas"] = pulgadas
+            if marca:
+                query["Marca"] = marca
+
+            # Consultar en MongoDB
+            results = list(collection.find(query))
+
+            # Mostrar resultados
+            if results:
+                st.write("Ordenadores encontrados:")
+                for doc in results:
+                    st.write(doc)
+            else:
+                st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
+
+    except Exception as ex:
+        st.error(f"Error: {ex}")
+
+if __name__ == "__main__":
+    main()
