@@ -73,10 +73,11 @@ def main():
             query = {}
 
             if pulgadas:
-                # Buscar si el número de pulgadas aparece en el contenido del documento
+                # Aquí modificamos la consulta para que busque en los campos específicos de las especificaciones del ordenador
                 query = {"$or": []}  # Crear una lista para las condiciones OR
                 for key in collection.find_one():  # Iterar sobre todas las claves de los documentos
-                    query["$or"].append({key: {"$regex": str(pulgadas), "$options": "i"}})  # Buscar "16" en cualquier campo de texto
+                    if isinstance(collection.find_one()[key], str):  # Si el campo es un texto
+                        query["$or"].append({key: {"$regex": str(pulgadas), "$options": "i"}})  # Buscar "16" en cualquier campo de texto
 
             if marca:
                 # Filtrar también por marca, si la marca es detectada
