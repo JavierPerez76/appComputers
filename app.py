@@ -74,9 +74,6 @@ def main():
                     if ram_match:
                         ram = ram_match.group(0)  # Obtener solo el número
 
-            # Mostrar en Streamlit las entidades detectadas
-            st.write(f"🔍 Entidades detectadas por Azure: {entities}")
-
             # Construir la consulta para MongoDB
             query = {}
 
@@ -91,9 +88,6 @@ def main():
             # Si se detecta RAM, agregar filtro por RAM (solo el número)
             if ram:
                 query["entities.RAM"] = ram  # Usamos la clave 'entities.RAM' para que coincida con la base de datos
-
-            # Mostrar la consulta generada para depuración
-            st.write(f"📝 Consulta generada para MongoDB: {query}")
 
             # Consultar en MongoDB
             results = list(collection.find(query))
@@ -120,7 +114,7 @@ def main():
                     pdf_url = f"{blob_storage_url}/{pdf_filename}"
 
                     # Añadir el enlace al final
-                    text_results += f"[Ver PDF]( {pdf_url} )\n\n"
+                    text_results += f"[Ver PDF aquí]( {pdf_url} )\n\n"
                     text_results += "---\n\n"
 
                 # Mostrar los resultados como texto en un solo párrafo con saltos de línea
