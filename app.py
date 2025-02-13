@@ -72,22 +72,16 @@ def main():
             # Construir la consulta para MongoDB
             query = {}
             if pulgadas:
-                # Usar $regex para buscar cualquier documento que contenga "16" en el campo
-                query = {"Pulgadas.text": {"$regex": f"^{pulgadas}", "$options": "i"}}
-
+                # Consulta ajustada para MongoDB
+                query["Pulgadas.text"] = pulgadas  # Buscando exactamente el número en el campo Pulgadas.text
             if marca:
                 query["Marca.text"] = marca
-            st.write(f"Valor de pulgadas extraído: {pulgadas}")
 
             # Mostrar la consulta en la terminal para depuración
             st.write(f"📝 Consulta generada para MongoDB: {query}")
 
             # Consultar en MongoDB
             results = list(collection.find(query))
-
-            # Mostrar algunos documentos para ver la estructura
-            st.write("Documentos en MongoDB:")
-            st.write(list(collection.find({}).limit(3)))  # Mostrar 3 documentos de ejemplo
 
             # Mostrar resultados en Streamlit
             if results:
