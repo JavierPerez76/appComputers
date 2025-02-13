@@ -64,7 +64,7 @@ def main():
                     # Extraer solo el número (sin "pulgadas")
                     pulgadas = str(entity["text"]).split()[0]  # Tomar solo el número
                 elif entity["category"] == "Marca":
-                    marca = str(entity["text"])  
+                    marca = str(entity["text"])
 
             # Mostrar en Streamlit las entidades detectadas
             st.write(f"🔍 Entidades detectadas por Azure: {entities}")
@@ -73,7 +73,7 @@ def main():
             query = {}
             if pulgadas:
                 # Consulta ajustada para MongoDB usando $in para buscar en las listas
-                query = {"Pulgadas.text": {"$in": [pulgadas]}}  
+                query["Pulgadas.text"] = pulgadas  # Se usa la clave "Pulgadas.text" directamente
             if marca:
                 # Consulta para filtrar por marca, si la marca es detectada
                 query["Marca.text"] = marca
@@ -81,12 +81,12 @@ def main():
             # Mostrar la consulta en la terminal para depuración
             st.write(f"📝 Consulta generada para MongoDB: {query}")
 
+            # Consultar en MongoDB
+            results = list(collection.find(query))
+
             # Mostrar algunos documentos para ver la estructura
             st.write("Documentos en MongoDB:")
             st.write(list(collection.find({}).limit(3)))  # Mostrar 3 documentos de ejemplo
-
-            # Consultar en MongoDB
-            results = list(collection.find(query))
 
             # Mostrar resultados en Streamlit
             if results:
