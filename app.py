@@ -62,8 +62,8 @@ def main():
 
             for entity in entities:
                 if entity["category"].lower() == "pulgadas":
-                    # Limpiar espacios adicionales o caracteres extraños
-                    pulgadas = entity["text"].strip()  
+                    # Limpiar la entidad para que solo quede el número
+                    pulgadas = entity["text"].strip().split(" ")[0]  # Solo el número antes de "pulgadas"
                 elif entity["category"].lower() == "marca":
                     marca = entity["text"].strip()
 
@@ -73,7 +73,7 @@ def main():
             # Construir la consulta para MongoDB
             query = {}
             if pulgadas:
-                query["Pulgadas"] = {"$regex": f"^{pulgadas}$", "$options": "i"}  
+                query["Pulgadas"] = int(pulgadas)  # Convertir a entero para buscar el número exacto
             if marca:
                 query["Marca"] = {"$regex": f"^{marca}$", "$options": "i"}  
 
