@@ -81,7 +81,12 @@ def main():
 
             # Si se detectan pulgadas, modificamos la consulta
             if pulgadas:
-                query["Especificaciones.Pulgadas"] = pulgadas  # Asegúrate de que "Pulgadas" esté en el subdocumento 'Especificaciones'
+                try:
+                    # Intentamos convertir a entero para la consulta
+                    query["Especificaciones.Pulgadas"] = int(pulgadas)
+                except ValueError:
+                    # Si no se puede convertir, buscar como string
+                    query["Especificaciones.Pulgadas"] = f"{pulgadas} pulgadas"  # Buscando como string
 
             # Si se detecta marca, filtrar también por marca
             if marca:
