@@ -69,19 +69,18 @@ def main():
                 st.write(f"🔍 Entidades detectadas por Azure: {entities}")
 
                 # Construir la consulta para MongoDB
-                query = {}
-                for key in collection.find():
-                    # Consultar cada archivo por el valor de pulgadas
-                    if 'Pulgadas' in collection[key] and collection[key]['Pulgadas'] == pulgadas_num:
-                        query[key] = collection[key]
+                query = {"Pulgadas": pulgadas_num}
 
                 # Mostrar la consulta generada para depuración
                 st.write(f"📝 Consulta generada para MongoDB: {query}")
 
-                # Mostrar los resultados de la consulta
-                if query:
+                # Consultar en MongoDB y mostrar resultados
+                results = collection.find(query)
+                results_list = list(results)  # Convertir el cursor en una lista
+
+                if results_list:
                     st.write("Ordenadores encontrados:")
-                    for key, doc in query.items():
+                    for doc in results_list:
                         st.json(doc)
                 else:
                     st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
