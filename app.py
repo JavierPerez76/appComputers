@@ -83,7 +83,9 @@ def main():
 
             # Si se detecta RAM, se convierte a número
             if "RAM" in file_entities:
-                query["RAM"] = int(file_entities["RAM"])  # Convertir a entero
+                # Convertir la RAM a un número entero, eliminando la palabra "GB"
+                ram_value = file_entities["RAM"].replace("GB", "").strip()
+                query["RAM"] = int(ram_value)  # Convertir a entero
 
             # Mostrar la consulta generada para depuración
             print(f"📝 Consulta generada para MongoDB: {query}")
