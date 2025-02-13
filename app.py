@@ -72,11 +72,12 @@ def main():
             # Construir la consulta para MongoDB
             query = {}
             if pulgadas:
-                # Consulta ajustada para MongoDB usando $in para buscar en las listas
-                query["Pulgadas.text"] = pulgadas  # Se usa la clave "Pulgadas.text" directamente
+                # Usar $regex para buscar cualquier documento que contenga "16" en el campo
+                query = {"Pulgadas.text": {"$regex": f"^{pulgadas}", "$options": "i"}}
+
             if marca:
-                # Consulta para filtrar por marca, si la marca es detectada
                 query["Marca.text"] = marca
+            st.write(f"Valor de pulgadas extraído: {pulgadas}")
 
             # Mostrar la consulta en la terminal para depuración
             st.write(f"📝 Consulta generada para MongoDB: {query}")
