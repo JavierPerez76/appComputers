@@ -81,7 +81,7 @@ def main():
 
             # Si se detectan pulgadas, modificamos la consulta
             if pulgadas:
-                query["Pulgadas"] = pulgadas  # Asumimos que tienes un campo llamado 'pulgadas'
+                query["Especificaciones.Pulgadas"] = pulgadas  # Asegúrate de que "Pulgadas" esté en el subdocumento 'Especificaciones'
 
             # Si se detecta marca, filtrar también por marca
             if marca:
@@ -89,7 +89,7 @@ def main():
 
             # Si se detecta RAM, agregar filtro por RAM (solo el número)
             if ram:
-                query["RAM"] = ram  # Convertir a entero para la consulta
+                query["Especificaciones.RAM"] = int(ram)  # Convertir a entero para la consulta
 
             # Mostrar la consulta generada para depuración
             st.write(f"📝 Consulta generada para MongoDB: {query}")
