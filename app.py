@@ -102,20 +102,20 @@ def main():
                 text_results = "Ordenadores encontrados:\n\n"
                 for doc in results:
                     # Crear un texto con la información relevante de cada ordenador
-                    text_results += f"**Marca**: {doc['entities'].get('Marca', 'N/A')}\n"
-                    text_results += f"**Modelo**: {doc['entities'].get('Modelo', 'N/A')}\n"
-                    text_results += f"**Código**: {doc['entities'].get('Codigo', 'N/A')}\n"
-                    text_results += f"**Precio**: {doc['entities'].get('Precio', 'N/A')}\n"
-                    text_results += f"**Almacenamiento**: {doc['entities'].get('Almacenamiento', 'N/A')} GB\n"
-                    text_results += f"**RAM**: {doc['entities'].get('RAM', 'N/A')} GB\n"
-                    text_results += f"**Pantalla**: {doc['entities'].get('Pulgadas', 'N/A')} pulgadas\n"
-                    text_results += f"**Procesador**: {doc['entities'].get('Procesador', 'N/A')}\n"
-                    text_results += f"**Color**: {doc['entities'].get('Color', 'N/A')}\n"
-                    text_results += f"**Gráfica**: {doc['entities'].get('Grafica', 'N/A')}\n"
-                    text_results += f"**Garantía**: {doc['entities'].get('Garantia', 'N/A')}\n"
-                    text_results += "\n---\n"
+                    text_results += f"**Marca**: {doc['entities'].get('Marca', 'N/A')}\n\n"
+                    text_results += f"**Modelo**: {doc['entities'].get('Modelo', 'N/A')}\n\n"
+                    text_results += f"**Código**: {doc['entities'].get('Codigo', 'N/A')}\n\n"
+                    text_results += f"**Precio**: {doc['entities'].get('Precio', 'N/A')}\n\n"
+                    text_results += f"**Almacenamiento**: {doc['entities'].get('Almacenamiento', 'N/A')} GB\n\n"
+                    text_results += f"**RAM**: {doc['entities'].get('RAM', 'N/A')} GB\n\n"
+                    text_results += f"**Pantalla**: {doc['entities'].get('Pulgadas', 'N/A')} pulgadas\n\n"
+                    text_results += f"**Procesador**: {doc['entities'].get('Procesador', 'N/A')}\n\n"
+                    text_results += f"**Color**: {doc['entities'].get('Color', 'N/A')}\n\n"
+                    text_results += f"**Gráfica**: {doc['entities'].get('Grafica', 'N/A')}\n\n"
+                    text_results += f"**Garantía**: {doc['entities'].get('Garantia', 'N/A')}\n\n"
+                    text_results += "---\n\n"
 
-                # Mostrar los resultados como texto en un solo párrafo
+                # Mostrar los resultados como texto en un solo párrafo con saltos de línea
                 st.write(text_results)
             else:
                 st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
