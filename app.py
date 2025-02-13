@@ -9,10 +9,9 @@ def main():
         ls_prediction_endpoint = st.secrets['azure_endpoint']
         ls_prediction_key = st.secrets['azure_key']
         mongodb_connection_string = st.secrets['mongodb_connection_string']
-        container_url = "https://javipdf.blob.core.windows.net/pdfs/"  
 
         # Conectar a MongoDB con la connection string
-        client = MongoClient(mongodb_connection_string)  
+        client = MongoClient(mongodb_connection_string)
         db = client["mongodb"]
         collection = db["computers"]
 
@@ -56,57 +55,41 @@ def main():
             top_intent = result["result"]["prediction"]["topIntent"]
             entities = result["result"]["prediction"]["entities"]
 
-            # Extraer pulgadas y marca de las entidades
+            # Extraer pulgadas
             pulgadas = None
-            marca = None
-
             for entity in entities:
-                if entity["category"].lower() == "pulgadas":
-                    # Limpiar la entidad para que solo quede el número
-                    pulgadas = entity["text"].strip().split(" ")[0]  # Solo el número antes de "pulgadas"
-                elif entity["category"].lower() == "marca":
-                    marca = entity["text"].strip()
+                if entity["category"] == "Pulgadas":
+                    pulgadas = str(entity["text"])
 
-            # Mostrar entidades detectadas para depuración
-            st.write(f"🔍 Entidades detectadas por Azure: {entities}")
-
-            # Construir la consulta para MongoDB
-            query = {}
             if pulgadas:
-                # Buscamos en todos los objetos donde "Pulgadas" tenga el valor adecuado
-                query = {f"ficha.Pulgadas": int(pulgadas)}  # Si las fichas están bajo "ficha"
+                # Eliminar "pulgadas" del valor de la entidad
+                pulgadas_num = int(pulgadas.split()[0])  # Asumimos que siempre se da el número antes de "pulgadas"
+                
+                # Mostrar las entidades detectadas para depuración
+                st.write(f"🔍 Entidades detectadas por Azure: {entities}")
 
-            if marca:
-                query["Marca"] = {"$regex": f"^{marca}$", "$options": "i"}  
+                # Construir la consulta para MongoDB
+                query = {}
+                for key in collection.find():
+                    # Consultar cada archivo por el valor de pulgadas
+                    if 'Pulgadas' in collection[key] and collection[key]['Pulgadas'] == pulgadas_num:
+                        query[key] = collection[key]
 
-            # Mostrar la consulta para depuración
-            st.write(f"📝 Consulta generada para MongoDB: {query}")
+                # Mostrar la consulta generada para depuración
+                st.write(f"📝 Consulta generada para MongoDB: {query}")
 
-            # Consultar en MongoDB
-            results = list(collection.find(query))
-
-            # Mostrar resultados en Streamlit
-            if results:
-                st.write("Ordenadores encontrados:")
-                for doc in results:
-                    modelo = doc.get("Modelo", "Desconocido")
-                    marca = doc.get("Marca", "Desconocida")
-                    pulgadas = doc.get("Pulgadas", "Desconocidas")
-
-                    # Construir la URL del PDF
-                    pdf_url = f"{container_url}{modelo}.pdf"
-
-                    # Mostrar datos
-                    st.text(f"Modelo: {modelo}")
-                    st.text(f"Marca: {marca}")
-                    st.text(f"Pulgadas: {pulgadas}")
-                    st.markdown(f"[Ver ficha técnica 📄]({pdf_url})", unsafe_allow_html=True)
-
+                # Mostrar los resultados de la consulta
+                if query:
+                    st.write("Ordenadores encontrados:")
+                    for key, doc in query.items():
+                        st.json(doc)
+                else:
+                    st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
             else:
-                st.write("❌ No se encontraron ordenadores que coincidan con tu búsqueda.")
+                st.write("No se detectó la entidad 'Pulgadas' en la entrada.")
 
     except Exception as ex:
-        st.error(f"⚠️ Error: {ex}")
+        st.error(f"Error: {ex}")
 
 if __name__ == "__main__":
     main()
