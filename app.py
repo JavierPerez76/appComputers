@@ -72,8 +72,8 @@ def main():
             # Construir la consulta para MongoDB
             query = {}
             if pulgadas:
-                # Consulta ajustada para MongoDB, solo con el número de pulgadas
-                query = {"Pulgadas.text": pulgadas}  
+                # Consulta ajustada para MongoDB usando $in para buscar en las listas
+                query = {"Pulgadas.text": {"$in": [pulgadas]}}  
             if marca:
                 # Consulta para filtrar por marca, si la marca es detectada
                 query["Marca.text"] = marca
