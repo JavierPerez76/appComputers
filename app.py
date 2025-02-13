@@ -89,7 +89,7 @@ def main():
 
             # Si se detecta RAM, agregar filtro por RAM (solo el número)
             if ram:
-                query["RAM"] = int(ram)  # Convertir a entero para la consulta
+                query["RAM"] = f"'{ram}'"
 
             # Mostrar la consulta generada para depuración
             st.write(f"📝 Consulta generada para MongoDB: {query}")
