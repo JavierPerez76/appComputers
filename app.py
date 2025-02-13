@@ -13,7 +13,7 @@ def main():
         # Conectar a MongoDB con la connection string
         client = MongoClient(mongodb_connection_string)  
         db = client["mongodb"]
-        collection = db["computers"]
+        collection = db["computer"]
 
         st.title("Buscador de Ordenadores")
 
