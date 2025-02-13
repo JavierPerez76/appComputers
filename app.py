@@ -68,9 +68,9 @@ def main():
             # Construir la consulta para MongoDB
             query = {}
             if pulgadas:
-                query["Pulgadas.text"] = pulgadas  
+                query["Pulgadas"] = pulgadas  
             if marca:
-                query["Marca.text"] = marca 
+                query["Marca"] = marca 
 
             # Mostrar la consulta en la terminal para depuración
             print("Consulta generada para MongoDB:", query)
