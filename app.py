@@ -77,7 +77,6 @@ def main():
 
             if marca:
                 query["Marca.text"] = marca
-            st.write(f"Valor de pulgadas extraído: {pulgadas}")
 
             # Mostrar la consulta en la terminal para depuración
             st.write(f"📝 Consulta generada para MongoDB: {query}")
