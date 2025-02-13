@@ -72,9 +72,8 @@ def main():
             # Construir la consulta para MongoDB
             query = {}
             if pulgadas:
-                # Usar $regex para buscar cualquier documento que contenga "16" en el campo
-                query = {"Pulgadas.text": {"$regex": f"^{pulgadas}", "$options": "i"}}
-
+                # Buscar la clave de cada archivo que tenga el texto con las pulgadas (16, por ejemplo)
+                query = {f"{pulgadas}": {"$exists": True}}  # Buscar un valor con pulgadas especificas
             if marca:
                 query["Marca.text"] = marca
 
@@ -83,10 +82,6 @@ def main():
 
             # Consultar en MongoDB
             results = list(collection.find(query))
-
-            # Mostrar algunos documentos para ver la estructura
-            st.write("Documentos en MongoDB:")
-            st.write(list(collection.find({}).limit(3)))  # Mostrar 3 documentos de ejemplo
 
             # Mostrar resultados en Streamlit
             if results:
