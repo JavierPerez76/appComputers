@@ -10,6 +10,7 @@ def main():
         ls_prediction_endpoint = st.secrets['azure_endpoint']
         ls_prediction_key = st.secrets['azure_key']
         mongodb_connection_string = st.secrets['mongodb_connection_string']
+        blob_storage_url = st.secrets['blob_storage_url']
 
         # Conectar a MongoDB con la connection string
         client = MongoClient(mongodb_connection_string)  
@@ -113,6 +114,13 @@ def main():
                     text_results += f"**Color**: {doc['entities'].get('Color', 'N/A')}\n\n"
                     text_results += f"**Gráfica**: {doc['entities'].get('Grafica', 'N/A')}\n\n"
                     text_results += f"**Garantía**: {doc['entities'].get('Garantia', 'N/A')}\n\n"
+                    
+                    # Crear el enlace al PDF en el Blob Storage
+                    pdf_filename = f"{doc['entities'].get('Codigo', 'N/A')}.pdf"
+                    pdf_url = f"{blob_storage_url}/{pdf_filename}"
+
+                    # Añadir el enlace al final
+                    text_results += f"[Ver PDF]( {pdf_url} )\n\n"
                     text_results += "---\n\n"
 
                 # Mostrar los resultados como texto en un solo párrafo con saltos de línea
