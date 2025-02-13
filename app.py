@@ -83,10 +83,10 @@ def main():
             if pulgadas:
                 try:
                     # Intentamos convertir a entero para la consulta
-                    query["Especificaciones.Pulgadas"] = int(pulgadas)
+                    query["entities.Pulgadas"] = int(pulgadas)
                 except ValueError:
                     # Si no se puede convertir, buscar como string
-                    query["Especificaciones.Pulgadas"] = f"{pulgadas} pulgadas"  # Buscando como string
+                    query["entities.Pulgadas"] = f"{pulgadas} pulgadas"  # Buscando como string
 
             # Si se detecta marca, filtrar también por marca
             if marca:
@@ -94,7 +94,7 @@ def main():
 
             # Si se detecta RAM, agregar filtro por RAM (solo el número)
             if ram:
-                query["Especificaciones.RAM"] = int(ram)  # Convertir a entero para la consulta
+                query["entities.RAM"] = int(ram)  # Convertir a entero para la consulta
 
             # Mostrar la consulta generada para depuración
             st.write(f"📝 Consulta generada para MongoDB: {query}")
