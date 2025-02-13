@@ -116,7 +116,7 @@ def main():
                     text_results += "\n---\n"
 
                 # Mostrar los resultados como texto
-                st.text_area("Resultados de la búsqueda:", text_results, height=300)
+                st.markdown("Resultados de la búsqueda:", text_results, height=300)
             else:
                 st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
 
