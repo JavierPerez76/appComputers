@@ -71,10 +71,15 @@ def main():
 
             # Construir la consulta para MongoDB
             query = {}
+
             if pulgadas:
-                # Buscar la clave de cada archivo que tenga el texto con las pulgadas (16, por ejemplo)
-                query = {f"{pulgadas}": {"$exists": True}}  # Buscar un valor con pulgadas especificas
+                # Buscar si la palabra "16" (pulgadas) aparece en el contenido del documento
+                query = { "$or": [] }  # Crear una lista para las condiciones OR
+                for key in collection.find_one().keys():  # Iterar sobre todas las claves de los documentos
+                    query["$or"].append({f"{key}": {"$regex": str(pulgadas), "$options": "i"}})  # Buscar "16" en el contenido
+
             if marca:
+                # Filtrar también por marca, si la marca es detectada
                 query["Marca.text"] = marca
 
             # Mostrar la consulta en la terminal para depuración
