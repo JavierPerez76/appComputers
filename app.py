@@ -61,7 +61,8 @@ def main():
 
             for entity in entities:
                 if entity["category"] == "Pulgadas":
-                    pulgadas = str(entity["text"])  
+                    # Extraer solo el número (sin "pulgadas")
+                    pulgadas = str(entity["text"]).split()[0]  # Tomar solo el número
                 elif entity["category"] == "Marca":
                     marca = str(entity["text"])  
 
@@ -71,7 +72,7 @@ def main():
             # Construir la consulta para MongoDB
             query = {}
             if pulgadas:
-                # Consulta ajustada para MongoDB, accediendo a 'text' dentro de la lista 'Pulgadas'
+                # Consulta ajustada para MongoDB, solo con el número de pulgadas
                 query = {"Pulgadas.text": pulgadas}  
             if marca:
                 # Consulta para filtrar por marca, si la marca es detectada
