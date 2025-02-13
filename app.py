@@ -55,16 +55,19 @@ def main():
             top_intent = result["result"]["prediction"]["topIntent"]
             entities = result["result"]["prediction"]["entities"]
 
-            # Extraer pulgadas y marca de las entidades
+            # Inicializar las variables para las entidades
             pulgadas = None
             marca = None
+            ram = None
 
+            # Extraer las entidades de pulgadas, marca y RAM
             for entity in entities:
                 if entity["category"] == "Pulgadas":
-                    # Extraer solo el número (sin "pulgadas")
-                    pulgadas = str(entity["text"]).split()[0]  # Tomar solo el número
+                    pulgadas = str(entity["text"]).split()[0]  # Extraer solo el número
                 elif entity["category"] == "Marca":
                     marca = str(entity["text"])
+                elif entity["category"] == "RAM":
+                    ram = str(entity["text"])
 
             # Mostrar en Streamlit las entidades detectadas
             st.write(f"🔍 Entidades detectadas por Azure: {entities}")
@@ -79,6 +82,10 @@ def main():
             # Si se detecta marca, filtrar también por marca
             if marca:
                 query["marca"] = marca  # Asumimos que tienes un campo llamado 'marca'
+
+            # Si se detecta RAM, agregar filtro por RAM
+            if ram:
+                query["ram"] = ram  # Asumimos que tienes un campo llamado 'ram' en MongoDB
 
             # Mostrar la consulta generada para depuración
             st.write(f"📝 Consulta generada para MongoDB: {query}")
