@@ -9,6 +9,7 @@ def main():
         ls_prediction_endpoint = st.secrets['azure_endpoint']
         ls_prediction_key = st.secrets['azure_key']
         mongodb_connection_string = st.secrets['mongodb_connection_string']
+        container_url = "https://javipdf.blob.core.windows.net/pdfs/"  # URL base de Azure Storage
 
         # Conectar a MongoDB con la connection string
         client = MongoClient(mongodb_connection_string)  
@@ -68,9 +69,9 @@ def main():
             # Construir la consulta para MongoDB
             query = {}
             if pulgadas:
-                query["Pulgadas"] = pulgadas  
+                query["Pulgadas"] = pulgadas  # Ajusta si el campo es diferente
             if marca:
-                query["Marca"] = marca 
+                query["Marca"] = marca  
 
             # Mostrar la consulta en la terminal para depuración
             print("Consulta generada para MongoDB:", query)
@@ -82,7 +83,19 @@ def main():
             if results:
                 st.write("Ordenadores encontrados:")
                 for doc in results:
-                    st.json(doc)  
+                    modelo = doc.get("Modelo", "Desconocido")
+                    marca = doc.get("Marca", "Desconocida")
+                    pulgadas = doc.get("Pulgadas", "Desconocidas")
+
+                    # Construir la URL del PDF (se asume que tiene el mismo nombre que el TXT, pero con .pdf)
+                    pdf_url = f"{container_url}{modelo}.pdf"
+
+                    # Mostrar datos de manera estructurada
+                    st.text(f"Modelo: {modelo}")
+                    st.text(f"Marca: {marca}")
+                    st.text(f"Pulgadas: {pulgadas}")
+                    st.markdown(f"[Ver ficha técnica 📄]({pdf_url})", unsafe_allow_html=True)
+
             else:
                 st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
 
