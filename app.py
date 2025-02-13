@@ -9,9 +9,9 @@ def main():
     try:
         # Cargar variables de entorno
         load_dotenv()
-        # ls_prediction_endpoint = st.secrets['LS_CONVERSATIONS_ENDPOINT']
-        # ls_prediction_key = st.secrets['LS_CONVERSATIONS_KEY']
-        # mongodb_connection_string = st.secrets['MONGODB_CONNECTION_STRING']
+        ls_prediction_endpoint = st.secrets['azure_endpoint']
+        ls_prediction_key = st.secrets['azure_endpoint']
+        mongodb_connection_string = st.secrets['mongodb_connection_string']
 
         # Conectar a MongoDB
         client = MongoClient(st.secrets["mongodb_connection_string"])
