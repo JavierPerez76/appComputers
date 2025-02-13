@@ -8,9 +8,8 @@ from azure.ai.language.conversations import ConversationAnalysisClient
 def main():
     try:
         # Cargar variables de entorno
-        load_dotenv()
         ls_prediction_endpoint = st.secrets['azure_endpoint']
-        ls_prediction_key = st.secrets['azure_endpoint']
+        ls_prediction_key = st.secrets['azure_key']
         mongodb_connection_string = st.secrets['mongodb_connection_string']
 
         # Conectar a MongoDB
