@@ -2,6 +2,7 @@ import streamlit as st
 from pymongo import MongoClient
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.language.conversations import ConversationAnalysisClient
+import re
 
 def main():
     try:
@@ -67,7 +68,10 @@ def main():
                 elif entity["category"] == "Marca":
                     marca = str(entity["text"])
                 elif entity["category"] == "RAM":
-                    ram = str(entity["text"])
+                    # Extraer solo el número de RAM, ignorando "GB de RAM" o similares
+                    ram_match = re.search(r'\d+', str(entity["text"]))
+                    if ram_match:
+                        ram = ram_match.group(0)  # Obtener solo el número
 
             # Mostrar en Streamlit las entidades detectadas
             st.write(f"🔍 Entidades detectadas por Azure: {entities}")
@@ -83,9 +87,9 @@ def main():
             if marca:
                 query["marca"] = marca  # Asumimos que tienes un campo llamado 'marca'
 
-            # Si se detecta RAM, agregar filtro por RAM
+            # Si se detecta RAM, agregar filtro por RAM (solo el número)
             if ram:
-                query["ram"] = ram  # Asumimos que tienes un campo llamado 'ram' en MongoDB
+                query["ram"] = int(ram)  # Convertir a entero para la consulta
 
             # Mostrar la consulta generada para depuración
             st.write(f"📝 Consulta generada para MongoDB: {query}")
