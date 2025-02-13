@@ -72,18 +72,15 @@ def main():
             # Construir la consulta para MongoDB
             query = {}
 
+            # Si se detectan pulgadas, modificamos la consulta
             if pulgadas:
-                # Aquí modificamos la consulta para que busque en los campos específicos de las especificaciones del ordenador
-                query = {"$or": []}  # Crear una lista para las condiciones OR
-                for key in collection.find_one():  # Iterar sobre todas las claves de los documentos
-                    if isinstance(collection.find_one()[key], str):  # Si el campo es un texto
-                        query["$or"].append({key: {"$regex": str(pulgadas), "$options": "i"}})  # Buscar "16" en cualquier campo de texto
+                query["pulgadas"] = pulgadas  # Asumimos que tienes un campo llamado 'pulgadas'
 
+            # Si se detecta marca, filtrar también por marca
             if marca:
-                # Filtrar también por marca, si la marca es detectada
-                query["Marca.text"] = marca
+                query["marca"] = marca  # Asumimos que tienes un campo llamado 'marca'
 
-            # Mostrar la consulta en la terminal para depuración
+            # Mostrar la consulta generada para depuración
             st.write(f"📝 Consulta generada para MongoDB: {query}")
 
             # Consultar en MongoDB
