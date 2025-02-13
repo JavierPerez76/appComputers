@@ -81,20 +81,15 @@ def main():
 
             # Si se detectan pulgadas, modificamos la consulta
             if pulgadas:
-                try:
-                    # Intentamos convertir a entero para la consulta
-                    query["entities.Pulgadas"] = int(pulgadas)
-                except ValueError:
-                    # Si no se puede convertir, buscar como string
-                    query["entities.Pulgadas"] = f"{pulgadas} pulgadas"  # Buscando como string
+                query["entities.Pulgadas"] = pulgadas  # Ajusta la clave según la estructura real
 
             # Si se detecta marca, filtrar también por marca
             if marca:
-                query["Marca"] = marca  # Asumimos que tienes un campo llamado 'marca'
+                query["entities.Marca"] = marca  # Ajusta la clave según la estructura real
 
             # Si se detecta RAM, agregar filtro por RAM (solo el número)
             if ram:
-                query["entities.RAM"] = int(ram)  # Convertir a entero para la consulta
+                query["entities.RAM"] = ram  # Usamos la clave 'entities.RAM' para que coincida con la base de datos
 
             # Mostrar la consulta generada para depuración
             st.write(f"📝 Consulta generada para MongoDB: {query}")
