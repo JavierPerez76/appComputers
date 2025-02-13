@@ -11,7 +11,7 @@ def main():
         mongodb_connection_string = st.secrets['mongodb_connection_string']
 
         # Conectar a MongoDB con la connection string
-        client = MongoClient(mongodb_connection_string)
+        client = MongoClient(mongodb_connection_string)  
         db = client["mongodb"]
         collection = db["computers"]
 
@@ -55,37 +55,41 @@ def main():
             top_intent = result["result"]["prediction"]["topIntent"]
             entities = result["result"]["prediction"]["entities"]
 
-            # Extraer pulgadas
+            # Extraer pulgadas y marca de las entidades
             pulgadas = None
+            marca = None
+
             for entity in entities:
                 if entity["category"] == "Pulgadas":
-                    pulgadas = str(entity["text"])
+                    pulgadas = str(entity["text"])  
+                elif entity["category"] == "Marca":
+                    marca = str(entity["text"])  
 
+            # Mostrar en Streamlit las entidades detectadas
+            st.write(f"🔍 Entidades detectadas por Azure: {entities}")
+
+            # Construir la consulta para MongoDB
+            query = {}
             if pulgadas:
-                # Eliminar "pulgadas" del valor de la entidad
-                pulgadas_num = int(pulgadas.split()[0])  # Asumimos que siempre se da el número antes de "pulgadas"
-                
-                # Mostrar las entidades detectadas para depuración
-                st.write(f"🔍 Entidades detectadas por Azure: {entities}")
+                # Consulta ajustada para MongoDB, accediendo a 'text' dentro de la lista 'Pulgadas'
+                query = {"Pulgadas.text": pulgadas}  
+            if marca:
+                # Consulta para filtrar por marca, si la marca es detectada
+                query["Marca.text"] = marca
 
-                # Construir la consulta para MongoDB
-                query = {"Pulgadas": pulgadas_num}
+            # Mostrar la consulta en la terminal para depuración
+            st.write(f"📝 Consulta generada para MongoDB: {query}")
 
-                # Mostrar la consulta generada para depuración
-                st.write(f"📝 Consulta generada para MongoDB: {query}")
+            # Consultar en MongoDB
+            results = list(collection.find(query))
 
-                # Consultar en MongoDB y mostrar resultados
-                results = collection.find(query)
-                results_list = list(results)  # Convertir el cursor en una lista
-
-                if results_list:
-                    st.write("Ordenadores encontrados:")
-                    for doc in results_list:
-                        st.json(doc)
-                else:
-                    st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
+            # Mostrar resultados en Streamlit
+            if results:
+                st.write("Ordenadores encontrados:")
+                for doc in results:
+                    st.json(doc)  # Mostrar los documentos encontrados
             else:
-                st.write("No se detectó la entidad 'Pulgadas' en la entrada.")
+                st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
 
     except Exception as ex:
         st.error(f"Error: {ex}")
