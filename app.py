@@ -61,20 +61,23 @@ def main():
             marca = None
 
             for entity in entities:
-                if entity["category"] == "pulgadas":
+                if entity["category"].lower() == "pulgadas":
                     pulgadas = str(entity["text"])  
-                elif entity["category"] == "marca":
+                elif entity["category"].lower() == "marca":
                     marca = str(entity["text"])  
+
+            # Mostrar entidades detectadas para depuración
+            st.write(f"🔍 Entidades detectadas por Azure: {entities}")
 
             # Construir la consulta para MongoDB
             query = {}
             if pulgadas:
-                query["Pulgadas"] = pulgadas  # Ajusta si el campo es diferente
+                query["Pulgadas"] = {"$regex": f"^{pulgadas}$", "$options": "i"}  
             if marca:
-                query["Marca"] = marca  
+                query["Marca"] = {"$regex": f"^{marca}$", "$options": "i"}  
 
-            # Mostrar la consulta en la terminal para depuración
-            print("Consulta generada para MongoDB:", query)
+            # Mostrar la consulta para depuración
+            st.write(f"📝 Consulta generada para MongoDB: {query}")
 
             # Consultar en MongoDB
             results = list(collection.find(query))
@@ -87,20 +90,20 @@ def main():
                     marca = doc.get("Marca", "Desconocida")
                     pulgadas = doc.get("Pulgadas", "Desconocidas")
 
-                    # Construir la URL del PDF (se asume que tiene el mismo nombre que el TXT, pero con .pdf)
+                    # Construir la URL del PDF
                     pdf_url = f"{container_url}{modelo}.pdf"
 
-                    # Mostrar datos de manera estructurada
+                    # Mostrar datos
                     st.text(f"Modelo: {modelo}")
                     st.text(f"Marca: {marca}")
                     st.text(f"Pulgadas: {pulgadas}")
                     st.markdown(f"[Ver ficha técnica 📄]({pdf_url})", unsafe_allow_html=True)
 
             else:
-                st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
+                st.write("❌ No se encontraron ordenadores que coincidan con tu búsqueda.")
 
     except Exception as ex:
-        st.error(f"Error: {ex}")
+        st.error(f"⚠️ Error: {ex}")
 
 if __name__ == "__main__":
     main()
