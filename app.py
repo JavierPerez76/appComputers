@@ -115,8 +115,8 @@ def main():
                     text_results += f"**Garantía**: {doc['entities'].get('Garantia', 'N/A')}\n"
                     text_results += "\n---\n"
 
-                # Mostrar los resultados como texto
-                st.markdown("Resultados de la búsqueda:", text_results)
+                # Mostrar los resultados como texto en un solo párrafo
+                st.write(text_results)
             else:
                 st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
 
