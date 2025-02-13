@@ -9,7 +9,7 @@ def main():
         ls_prediction_endpoint = st.secrets['azure_endpoint']
         ls_prediction_key = st.secrets['azure_key']
         mongodb_connection_string = st.secrets['mongodb_connection_string']
-        container_url = "https://javipdf.blob.core.windows.net/pdfs/"  # URL base de Azure Storage
+        container_url = "https://javipdf.blob.core.windows.net/pdfs/"  
 
         # Conectar a MongoDB con la connection string
         client = MongoClient(mongodb_connection_string)  
@@ -62,9 +62,10 @@ def main():
 
             for entity in entities:
                 if entity["category"].lower() == "pulgadas":
-                    pulgadas = str(entity["text"])  
+                    # Limpiar espacios adicionales o caracteres extraños
+                    pulgadas = entity["text"].strip()  
                 elif entity["category"].lower() == "marca":
-                    marca = str(entity["text"])  
+                    marca = entity["text"].strip()
 
             # Mostrar entidades detectadas para depuración
             st.write(f"🔍 Entidades detectadas por Azure: {entities}")
