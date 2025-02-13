@@ -27,8 +27,8 @@ def main():
             )
 
             # Llamar al modelo del servicio de lenguaje para obtener la intención y entidades
-            cls_project = 'OrdenadoresConversational'
-            deployment_slot = 'IntentOrdenadores'
+            cls_project = 'CLUordenadores'
+            deployment_slot = 'modelo'
 
             with language_client:
                 result = language_client.analyze_conversation(
