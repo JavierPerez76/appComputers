@@ -73,7 +73,9 @@ def main():
             # Construir la consulta para MongoDB
             query = {}
             if pulgadas:
-                query["Pulgadas"] = int(pulgadas)  # Convertir a entero para buscar el número exacto
+                # Buscamos en todos los objetos donde "Pulgadas" tenga el valor adecuado
+                query = {f"ficha.Pulgadas": int(pulgadas)}  # Si las fichas están bajo "ficha"
+
             if marca:
                 query["Marca"] = {"$regex": f"^{marca}$", "$options": "i"}  
 
