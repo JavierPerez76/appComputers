@@ -81,15 +81,15 @@ def main():
 
             # Si se detectan pulgadas, modificamos la consulta
             if pulgadas:
-                query["pulgadas"] = pulgadas  # Asumimos que tienes un campo llamado 'pulgadas'
+                query["Pulgadas"] = pulgadas  # Asumimos que tienes un campo llamado 'pulgadas'
 
             # Si se detecta marca, filtrar también por marca
             if marca:
-                query["marca"] = marca  # Asumimos que tienes un campo llamado 'marca'
+                query["Marca"] = marca  # Asumimos que tienes un campo llamado 'marca'
 
             # Si se detecta RAM, agregar filtro por RAM (solo el número)
             if ram:
-                query["ram"] = int(ram)  # Convertir a entero para la consulta
+                query["RAM"] = int(ram)  # Convertir a entero para la consulta
 
             # Mostrar la consulta generada para depuración
             st.write(f"📝 Consulta generada para MongoDB: {query}")
