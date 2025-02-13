@@ -81,15 +81,15 @@ def main():
 
             # Si se detectan pulgadas, modificamos la consulta
             if pulgadas:
-                query["Pulgadas"] = pulgadas  # Cambié a "Pulgadas" directamente, ya que la base de datos la tiene así.
+                query["entities.Pulgadas"] = pulgadas  # Ajusta la clave según la estructura real
 
             # Si se detecta marca, filtrar también por marca
             if marca:
-                query["Marca"] = marca
+                query["entities.Marca"] = marca  # Ajusta la clave según la estructura real
 
-            # Si se detecta RAM, agregar filtro por RAM
+            # Si se detecta RAM, agregar filtro por RAM (solo el número)
             if ram:
-                query["RAM"] = int(ram)  # Convertir a entero para la consulta
+                query["entities.RAM"] = ram  # Usamos la clave 'entities.RAM' para que coincida con la base de datos
 
             # Mostrar la consulta generada para depuración
             st.write(f"📝 Consulta generada para MongoDB: {query}")
@@ -97,25 +97,26 @@ def main():
             # Consultar en MongoDB
             results = list(collection.find(query))
 
-            # Mostrar resultados en Streamlit en formato de texto
+            # Generar un texto para mostrar los resultados
             if results:
-                st.write("### Ordenadores encontrados:")
+                text_results = "Ordenadores encontrados:\n\n"
                 for doc in results:
-                    text_results = (
-                        f"**Marca**: {doc['entities'].get('Marca', 'No disponible')}\n"
-                        f"**Modelo**: {doc['entities'].get('Modelo', 'No disponible')}\n"
-                        f"**Código**: {doc['entities'].get('Codigo', 'No disponible')}\n"
-                        f"**Precio**: {doc['entities'].get('Precio', 'No disponible')}\n"
-                        f"**Almacenamiento**: {doc['entities'].get('Almacenamiento', 'No disponible')}\n"
-                        f"**RAM**: {doc['entities'].get('RAM', 'No disponible')}\n"
-                        f"**Pantalla**: {doc['entities'].get('Pulgadas', 'No disponible')} pulgadas\n"
-                        f"**Procesador**: {', '.join([p['text'] for p in doc['entities'].get('Procesador', [])]) if isinstance(doc['entities'].get('Procesador', []), list) else doc['entities'].get('Procesador', 'No disponible')}\n"
-                        f"**Color**: {doc['entities'].get('Color', 'No disponible')}\n"
-                        f"**Gráfica**: {doc['entities'].get('Grafica', 'No disponible')}\n"
-                        f"**Garantía**: {doc['entities'].get('Garantia', 'No disponible')}\n"
-                        "---\n"
-                    )
-                    st.markdown(text_results)
+                    # Crear un texto con la información relevante de cada ordenador
+                    text_results += f"**Marca**: {doc['entities'].get('Marca', 'N/A')}\n"
+                    text_results += f"**Modelo**: {doc['entities'].get('Modelo', 'N/A')}\n"
+                    text_results += f"**Código**: {doc['entities'].get('Codigo', 'N/A')}\n"
+                    text_results += f"**Precio**: {doc['entities'].get('Precio', 'N/A')}\n"
+                    text_results += f"**Almacenamiento**: {doc['entities'].get('Almacenamiento', 'N/A')} GB\n"
+                    text_results += f"**RAM**: {doc['entities'].get('RAM', 'N/A')} GB\n"
+                    text_results += f"**Pantalla**: {doc['entities'].get('Pulgadas', 'N/A')} pulgadas\n"
+                    text_results += f"**Procesador**: {doc['entities'].get('Procesador', 'N/A')}\n"
+                    text_results += f"**Color**: {doc['entities'].get('Color', 'N/A')}\n"
+                    text_results += f"**Gráfica**: {doc['entities'].get('Grafica', 'N/A')}\n"
+                    text_results += f"**Garantía**: {doc['entities'].get('Garantia', 'N/A')}\n"
+                    text_results += "\n---\n"
+
+                # Mostrar los resultados como texto
+                st.text_area("Resultados de la búsqueda:", text_results, height=300)
             else:
                 st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
 
