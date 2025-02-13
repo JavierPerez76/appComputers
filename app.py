@@ -1,113 +1,112 @@
-import os
-import json
-from dotenv import load_dotenv
+import streamlit as st
 from pymongo import MongoClient
 from azure.core.credentials import AzureKeyCredential
-from azure.ai.textanalytics import TextAnalyticsClient
+from azure.ai.language.conversations import ConversationAnalysisClient
+import re
 
 def main():
     try:
-        # Get Configuration Settings
-        load_dotenv()
-        ai_endpoint = os.getenv('ENDPOINT_NER')
-        ai_key = os.getenv('KEY_NER')
-        project_name = os.getenv('PROJECT')
-        deployment_name = os.getenv('DEPLOYMENT')
+        # Cargar variables de entorno desde Streamlit Secrets
+        ls_prediction_endpoint = st.secrets['azure_endpoint']
+        ls_prediction_key = st.secrets['azure_key']
+        mongodb_connection_string = st.secrets['mongodb_connection_string']
 
-        # MongoDB Configuration
-        client = MongoClient("mongodb+srv://javi:Mongodb123@mongodb-javi.global.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000")
-        db_name = "mongodb"  # Nombre de tu base de datos
-        db = client[db_name]
-        collection_name = "computer"  # Nombre de la colección
+        # Conectar a MongoDB con la connection string
+        client = MongoClient(mongodb_connection_string)  
+        db = client["mongodb"]
+        collection = db["computer"]
 
-        # Borrar la base de datos antes de crearla de nuevo
-        client.drop_database(db_name)
-        print(f"✅ Base de datos {db_name} eliminada.")
+        st.title("Buscador de Ordenadores")
 
-        # Crear la base de datos nuevamente
-        db = client[db_name]
-        collection = db[collection_name]
+        # Pedir entrada al usuario
+        user_input = st.text_input("¿Qué tipo de ordenador buscas?", "")
 
-        # Create client using endpoint and key
-        credential = AzureKeyCredential(ai_key)
-        ai_client = TextAnalyticsClient(endpoint=ai_endpoint, credential=credential)
+        if user_input:
+            # Crear un cliente para el modelo del servicio de lenguaje en Azure
+            language_client = ConversationAnalysisClient(
+                ls_prediction_endpoint, AzureKeyCredential(ls_prediction_key)
+            )
 
-        # Read each text file in the ads folder
-        batchedDocuments = []
-        folder = '../txt'
-        files = os.listdir(folder)
-        for file_name in files:
-            # Read the file contents
-            text = open(os.path.join(folder, file_name), encoding='utf8').read()
-            batchedDocuments.append(text)
+            # Llamar al modelo del servicio de lenguaje para obtener la intención y entidades
+            cls_project = 'CLUordenadores'
+            deployment_slot = 'modelo'
 
-        # Extract entities
-        operation = ai_client.begin_recognize_custom_entities(
-            batchedDocuments,
-            project_name=project_name,
-            deployment_name=deployment_name
-        )
+            with language_client:
+                result = language_client.analyze_conversation(
+                    task={
+                        "kind": "Conversation",
+                        "analysisInput": {
+                            "conversationItem": {
+                                "participantId": "1",
+                                "id": "1",
+                                "modality": "text",
+                                "language": "es",
+                                "text": user_input
+                            },
+                            "isLoggingEnabled": False
+                        },
+                        "parameters": {
+                            "projectName": cls_project,
+                            "deploymentName": deployment_slot,
+                            "verbose": True
+                        }
+                    }
+                )
 
-        document_results = operation.result()
+            top_intent = result["result"]["prediction"]["topIntent"]
+            entities = result["result"]["prediction"]["entities"]
 
-        # Prepare a list to store MongoDB documents
-        mongo_documents = []
+            # Inicializar las variables para las entidades
+            pulgadas = None
+            marca = None
+            ram = None
 
-        for doc, custom_entities_result in zip(files, document_results):
-            file_entities = {}
+            # Extraer las entidades de pulgadas, marca y RAM
+            for entity in entities:
+                if entity["category"] == "Pulgadas":
+                    pulgadas = str(entity["text"]).split()[0]  # Extraer solo el número
+                elif entity["category"] == "Marca":
+                    marca = str(entity["text"])
+                elif entity["category"] == "RAM":
+                    # Extraer solo el número de RAM, ignorando "GB de RAM" o similares
+                    ram_match = re.search(r'\d+', str(entity["text"]))
+                    if ram_match:
+                        ram = ram_match.group(0)  # Obtener solo el número
 
-            if custom_entities_result.kind == "CustomEntityRecognition":
-                for entity in custom_entities_result.entities:
-                    category = entity.category
-                    if category not in file_entities:
-                        file_entities[category] = []
+            # Mostrar en Streamlit las entidades detectadas
+            st.write(f"🔍 Entidades detectadas por Azure: {entities}")
 
-                    # Append entity details without confidence_score
-                    file_entities[category].append({
-                        "text": entity.text  # Omitiendo el confidence_score
-                    })
-
-                # Si hay solo un valor en la lista de una categoría, lo asignamos directamente
-                for category, entities in file_entities.items():
-                    if len(entities) == 1:
-                        file_entities[category] = entities[0]['text']  # Asignamos el valor directamente, no como lista
-
-            elif custom_entities_result.is_error is True:
-                file_entities["error"] = {
-                    "code": custom_entities_result.error.code,
-                    "message": custom_entities_result.error.message
-                }
-
-            # Modificar la consulta para asegurarse de que se consulta como un número
+            # Construir la consulta para MongoDB
             query = {}
 
-            # Si se detecta RAM, se convierte a número
-            if "RAM" in file_entities:
-                query["RAM"] = int(file_entities["RAM"])  # Convertir a entero
+            # Si se detectan pulgadas, modificamos la consulta
+            if pulgadas:
+                query["Pulgadas"] = pulgadas  # Asumimos que tienes un campo llamado 'pulgadas'
+
+            # Si se detecta marca, filtrar también por marca
+            if marca:
+                query["Marca"] = marca  # Asumimos que tienes un campo llamado 'marca'
+
+            # Si se detecta RAM, agregar filtro por RAM (solo el número)
+            if ram:
+                query["RAM"] = ram  # Convertir a entero para la consulta
 
             # Mostrar la consulta generada para depuración
-            print(f"📝 Consulta generada para MongoDB: {query}")
+            st.write(f"📝 Consulta generada para MongoDB: {query}")
 
             # Consultar en MongoDB
             results = list(collection.find(query))
+
+            # Mostrar resultados en Streamlit
             if results:
-                print(f"✅ Se encontraron {len(results)} resultados.")
+                st.write("Ordenadores encontrados:")
+                for doc in results:
+                    st.json(doc)  # Mostrar los documentos encontrados
             else:
-                print("❌ No se encontraron resultados.")
-
-            # Add the document to the list for MongoDB
-            mongo_documents.append({
-                "_id": doc,  # Use the file name as the unique identifier
-                "entities": file_entities
-            })
-
-        # Insert the documents into MongoDB
-        collection.insert_many(mongo_documents)
-
-        print(f"✅ Entidades insertadas correctamente en MongoDB.")
+                st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
 
     except Exception as ex:
-        print(ex)
+        st.error(f"Error: {ex}")
 
 if __name__ == "__main__":
     main()
