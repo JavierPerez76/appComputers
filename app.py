@@ -81,6 +81,10 @@ def main():
             # Mostrar la consulta en la terminal para depuración
             st.write(f"📝 Consulta generada para MongoDB: {query}")
 
+            # Mostrar algunos documentos para ver la estructura
+            st.write("Documentos en MongoDB:")
+            st.write(list(collection.find({}).limit(3)))  # Mostrar 3 documentos de ejemplo
+
             # Consultar en MongoDB
             results = list(collection.find(query))
 
