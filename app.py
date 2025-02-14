@@ -96,7 +96,7 @@ def main():
             if results:
                 text_results = "Ordenadores encontrados:\n\n"
                 for doc in results:
-                    ordenador_info = []
+                    ordenador_info = ""
                     for key, label in {
                         "Marca": "Marca",
                         "Modelo": "Modelo",
@@ -111,22 +111,20 @@ def main():
                         "Garantia": "Garantía"
                     }.items():
                         valor = doc['entities'].get(key, 'N/A')
-                        if valor != "N/A":
+                        if valor != "N/A" and valor != "":
                             if key in ["Almacenamiento", "RAM"]:
-                                ordenador_info.append(f"**{label}**: {valor} GB")
+                                ordenador_info += f"**{label}**: {valor} GB\n\n"
                             elif key == "Pulgadas":
-                                ordenador_info.append(f"**{label}**: {valor} pulgadas")
+                                ordenador_info += f"**{label}**: {valor} pulgadas\n\n"
                             else:
-                                ordenador_info.append(f"**{label}**: {valor}")
+                                ordenador_info += f"**{label}**: {valor}\n\n"
 
-                    # Crear el enlace al PDF en el Blob Storage
-                    pdf_filename = f"{doc['entities'].get('Codigo', 'N/A')}.pdf"
-                    pdf_url = f"{blob_storage_url}/{pdf_filename}"
-
-                    ordenador_info.append(f"[Ver PDF aquí]( {pdf_url} )")
-                    ordenador_info.append("---")
-                    
-                    text_results += "\n".join(ordenador_info) + "\n\n"
+                    if ordenador_info:
+                        pdf_filename = f"{doc['entities'].get('Codigo', 'N/A')}.pdf"
+                        pdf_url = f"{blob_storage_url}/{pdf_filename}"
+                        ordenador_info += f"[Ver PDF aquí]( {pdf_url} )\n\n"
+                        ordenador_info += "---\n\n"
+                        text_results += ordenador_info
 
                 # Mostrar los resultados como texto en un solo párrafo con saltos de línea
                 st.write(text_results)
