@@ -73,12 +73,13 @@ def main():
             ram = None
             comparacion_almacenamiento = None
             almacenamiento = None
+            color = None  # Añadimos una variable para el color
 
             for entity in entities:
                 if entity["category"] == "Pulgadas":
                     pulgadas = str(entity["text"]).split()[0]
                 elif entity["category"] == "Marca":
-                    marca = str(entity["text"]).lower()  # Convertir a minúsculas para comparación insensible a mayúsculas
+                    marca = str(entity["text"])
                 elif entity["category"] == "RAM":
                     ram_match = re.search(r'\d+', str(entity["text"]))
                     if ram_match:
@@ -87,19 +88,18 @@ def main():
                     almacenamiento = str(entity["text"]).split()[0]
                 elif entity["category"] == "ComparacionAlmacenamiento":
                     comparacion_almacenamiento = str(entity["text"]).lower()
-
-            # Verificar si se ha encontrado una marca o información relevante
-            if not marca:
-                st.write("No se han encontrado ordenadores.")
-                return
+                elif entity["category"] == "Color":  # Detectar color
+                    color = str(entity["text"]).lower()
 
             query = {}
             if pulgadas:
                 query["entities.Pulgadas"] = pulgadas
             if marca:
-                query["entities.Marca"] = {"$regex": f"^{marca}$", "$options": "i"}  # Búsqueda case-insensitive exacta para la marca
+                query["entities.Marca"] = marca
             if ram:
                 query["entities.RAM"] = ram
+            if color:  # Si hay color, agregarlo a la consulta
+                query["entities.Color"] = color
 
             if almacenamiento:
                 almacenamiento_int = parse_storage(almacenamiento)
@@ -136,8 +136,8 @@ def main():
 
                     st.write("---")
             else:
-                st.write(f"No se encontraron ordenadores de la marca {marca}.")
-
+                st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
+    
     except Exception as ex:
         st.error(f"Error: {ex}")
 
