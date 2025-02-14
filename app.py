@@ -92,7 +92,7 @@ def main():
             if pulgadas:
                 query["entities.Pulgadas"] = pulgadas
             if marca:
-                query["entities.Marca"] = {"$regex": f"^{marca}$", "$options": "i"}  # Búsqueda case-insensitive
+                query["entities.Marca"] = {"$regex": f"^{marca}$", "$options": "i"}  # Búsqueda case-insensitive exacta para la marca
             if ram:
                 query["entities.RAM"] = ram
 
@@ -105,12 +105,6 @@ def main():
                         query["entities.Almacenamiento"] = {"$lt": almacenamiento_int}
                     else:
                         query["entities.Almacenamiento"] = almacenamiento_int
-
-            # Comprobar si la consulta de marca no tiene coincidencias exactas
-            if marca and collection.count_documents({"entities.Marca": {"$regex": f"^{marca}$", "$options": "i"}}) == 0:
-                # Si no se encuentra la marca, devolver un mensaje y evitar la consulta
-                st.write(f"No se encontraron ordenadores de la marca {marca}.")
-                return
 
             results = list(collection.find(query))
 
@@ -137,8 +131,8 @@ def main():
 
                     st.write("---")
             else:
-                st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
-    
+                st.write(f"No se encontraron ordenadores de la marca {marca}.")
+
     except Exception as ex:
         st.error(f"Error: {ex}")
 
