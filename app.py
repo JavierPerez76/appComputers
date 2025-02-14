@@ -11,6 +11,7 @@ def main():
         ls_prediction_key = st.secrets['azure_key']
         mongodb_connection_string = st.secrets['mongodb_connection_string']
         blob_storage_url = st.secrets['blob_storage_url']
+        sas_token = st.secrets['sas_token']
 
         # Conectar a MongoDB con la connection string
         client = MongoClient(mongodb_connection_string)  
@@ -69,25 +70,18 @@ def main():
                 elif entity["category"] == "Marca":
                     marca = str(entity["text"])
                 elif entity["category"] == "RAM":
-                    # Extraer solo el número de RAM, ignorando "GB de RAM" o similares
                     ram_match = re.search(r'\d+', str(entity["text"]))
                     if ram_match:
-                        ram = ram_match.group(0)  # Obtener solo el número
+                        ram = ram_match.group(0)
 
             # Construir la consulta para MongoDB
             query = {}
-
-            # Si se detectan pulgadas, modificamos la consulta
             if pulgadas:
-                query["entities.Pulgadas"] = pulgadas  # Ajusta la clave según la estructura real
-
-            # Si se detecta marca, filtrar también por marca
+                query["entities.Pulgadas"] = pulgadas
             if marca:
-                query["entities.Marca"] = marca  # Ajusta la clave según la estructura real
-
-            # Si se detecta RAM, agregar filtro por RAM (solo el número)
+                query["entities.Marca"] = marca
             if ram:
-                query["entities.RAM"] = ram  # Usamos la clave 'entities.RAM' para que coincida con la base de datos
+                query["entities.RAM"] = ram
 
             # Consultar en MongoDB
             results = list(collection.find(query))
@@ -96,41 +90,22 @@ def main():
             if results:
                 text_results = "Ordenadores encontrados:\n\n"
                 for doc in results:
-                    ordenador_info = ""
-                    for key, label in {
-                        "Marca": "Marca",
-                        "Modelo": "Modelo",
-                        "Codigo": "Código",
-                        "Precio": "Precio",
-                        "Almacenamiento": "Almacenamiento",
-                        "RAM": "RAM",
-                        "Pulgadas": "Pantalla",
-                        "Procesador": "Procesador",
-                        "Color": "Color",
-                        "Grafica": "Gráfica",
-                        "Garantia": "Garantía"
-                    }.items():
+                    detalles = []
+                    for key in ["Marca", "Modelo", "Codigo", "Precio", "Almacenamiento", "RAM", "Pulgadas", "Procesador", "Color", "Grafica", "Garantia"]:
                         valor = doc['entities'].get(key, 'N/A')
-                        if valor != "N/A" and valor != "":
-                            if key in ["Almacenamiento", "RAM"]:
-                                ordenador_info += f"**{label}**: {valor} GB\n\n"
-                            elif key == "Pulgadas":
-                                ordenador_info += f"**{label}**: {valor} pulgadas\n\n"
-                            else:
-                                ordenador_info += f"**{label}**: {valor}\n\n"
-
-                    if ordenador_info:
-                        pdf_filename = f"{doc['entities'].get('Codigo', 'N/A')}.pdf"
-                        pdf_url = f"{blob_storage_url}/{pdf_filename}"
-                        ordenador_info += f"[Ver ficha aquí]( {pdf_url} )\n\n"
-                        ordenador_info += "---\n\n"
-                        text_results += ordenador_info
-
-                # Mostrar los resultados como texto en un solo párrafo con saltos de línea
+                        if valor != 'N/A':
+                            detalles.append(f"**{key}**: {valor}")
+                    
+                    pdf_filename = f"{doc['entities'].get('Codigo', 'N/A')}.pdf"
+                    pdf_url = f"{blob_storage_url}{pdf_filename}?{sas_token}"
+                    
+                    detalles.append(f"[Ver PDF aquí]({pdf_url})")
+                    text_results += "\n\n".join(detalles) + "\n\n---\n\n"
+                
                 st.write(text_results)
             else:
                 st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
-
+    
     except Exception as ex:
         st.error(f"Error: {ex}")
 
