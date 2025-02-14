@@ -78,7 +78,7 @@ def main():
                 if entity["category"] == "Pulgadas":
                     pulgadas = str(entity["text"]).split()[0]
                 elif entity["category"] == "Marca":
-                    marca = str(entity["text"])
+                    marca = str(entity["text"]).lower()  # Convertir a minúsculas para comparación insensible a mayúsculas
                 elif entity["category"] == "RAM":
                     ram_match = re.search(r'\d+', str(entity["text"]))
                     if ram_match:
@@ -92,7 +92,7 @@ def main():
             if pulgadas:
                 query["entities.Pulgadas"] = pulgadas
             if marca:
-                query["entities.Marca"] = marca
+                query["entities.Marca"] = {"$regex": f"^{marca}$", "$options": "i"}  # Búsqueda case-insensitive
             if ram:
                 query["entities.RAM"] = ram
 
@@ -107,7 +107,7 @@ def main():
                         query["entities.Almacenamiento"] = almacenamiento_int
 
             # Comprobar si la consulta de marca no tiene coincidencias exactas
-            if marca and collection.count_documents({"entities.Marca": marca}) == 0:
+            if marca and collection.count_documents({"entities.Marca": {"$regex": f"^{marca}$", "$options": "i"}}) == 0:
                 # Si no se encuentra la marca, devolver un mensaje y evitar la consulta
                 st.write(f"No se encontraron ordenadores de la marca {marca}.")
                 return
