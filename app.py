@@ -111,7 +111,7 @@ def main():
             if results:
                 for doc in results:
                     modelo = doc['entities'].get("Modelo", "N/A")
-                    st.subheader(f"**{modelo}**")  # Mostrar el modelo en grande
+                    st.subheader(modelo)  # Mostrar el modelo en grande
 
                     # Mostrar las propiedades como una lista ordenada
                     st.write("### Propiedades del Ordenador:")
@@ -119,7 +119,7 @@ def main():
                     for key in ["Marca", "Codigo", "Precio", "Almacenamiento", "RAM", "Pulgadas", "Procesador", "Color", "Grafica", "Garantia"]:
                         valor = doc['entities'].get(key, 'N/A')
                         if valor != 'N/A':
-                            detalles.append(f"- **{key}**: {valor}")
+                            detalles.append(f"- {key}: {valor}")
 
                     # Mostrar las propiedades
                     st.write("\n".join(detalles))
@@ -127,7 +127,7 @@ def main():
                     # Mostrar el enlace para el PDF en una línea separada
                     pdf_filename = f"{doc['_id'][:-4]}.pdf"  
                     pdf_url = f"{blob_storage_url}{pdf_filename}?{sas_token}"
-                    st.markdown(f"[**Ver PDF aquí**]({pdf_url})", unsafe_allow_html=True)
+                    st.markdown(f"[Ver PDF aquí]({pdf_url})", unsafe_allow_html=True)
 
                     st.write("---")
             else:
