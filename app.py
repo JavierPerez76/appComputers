@@ -96,7 +96,7 @@ def main():
                         if valor != 'N/A':
                             detalles.append(f"**{key}**: {valor}")
                     
-                    pdf_filename = f"{doc['_id']}.pdf" 
+                    pdf_filename = f"{doc['_id'][:-4]}.pdf"  
                     pdf_url = f"{blob_storage_url}{pdf_filename}?{sas_token}"
                     
                     detalles.append(f"[Ver PDF aquí]({pdf_url})")
