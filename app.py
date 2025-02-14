@@ -90,7 +90,7 @@ def main():
 
             # Verificar si se ha encontrado una marca o información relevante
             if not marca:
-                st.write("No se han encontrado ordenadores")
+                st.write("No se han encontrado ordenadores.")
                 return
 
             query = {}
