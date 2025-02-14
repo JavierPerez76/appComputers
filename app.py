@@ -92,11 +92,14 @@ def main():
                 query["entities.RAM"] = ram
 
             # Manejo de la comparación de almacenamiento
-            if almacenamiento and almacenamiento_comparacion:
+            if almacenamiento_comparacion:
                 if "más" in almacenamiento_comparacion:
-                    query["entities.Almacenamiento"] = {"$gte": almacenamiento}
+                    # Si el usuario pide más de, transformamos el valor en GB
+                    if almacenamiento:
+                        query["entities.Almacenamiento"] = {"$gte": almacenamiento}
                 elif "menos" in almacenamiento_comparacion:
-                    query["entities.Almacenamiento"] = {"$lte": almacenamiento}
+                    if almacenamiento:
+                        query["entities.Almacenamiento"] = {"$lte": almacenamiento}
 
             # Consultar en MongoDB
             results = list(collection.find(query))
