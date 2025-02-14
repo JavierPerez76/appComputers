@@ -96,26 +96,37 @@ def main():
             if results:
                 text_results = "Ordenadores encontrados:\n\n"
                 for doc in results:
-                    # Crear un texto con la información relevante de cada ordenador
-                    text_results += f"**Marca**: {doc['entities'].get('Marca', 'N/A')}\n\n"
-                    text_results += f"**Modelo**: {doc['entities'].get('Modelo', 'N/A')}\n\n"
-                    text_results += f"**Código**: {doc['entities'].get('Codigo', 'N/A')}\n\n"
-                    text_results += f"**Precio**: {doc['entities'].get('Precio', 'N/A')}\n\n"
-                    text_results += f"**Almacenamiento**: {doc['entities'].get('Almacenamiento', 'N/A')} GB\n\n"
-                    text_results += f"**RAM**: {doc['entities'].get('RAM', 'N/A')} GB\n\n"
-                    text_results += f"**Pantalla**: {doc['entities'].get('Pulgadas', 'N/A')} pulgadas\n\n"
-                    text_results += f"**Procesador**: {doc['entities'].get('Procesador', 'N/A')}\n\n"
-                    text_results += f"**Color**: {doc['entities'].get('Color', 'N/A')}\n\n"
-                    text_results += f"**Gráfica**: {doc['entities'].get('Grafica', 'N/A')}\n\n"
-                    text_results += f"**Garantía**: {doc['entities'].get('Garantia', 'N/A')}\n\n"
-                    
+                    ordenador_info = []
+                    for key, label in {
+                        "Marca": "Marca",
+                        "Modelo": "Modelo",
+                        "Codigo": "Código",
+                        "Precio": "Precio",
+                        "Almacenamiento": "Almacenamiento",
+                        "RAM": "RAM",
+                        "Pulgadas": "Pantalla",
+                        "Procesador": "Procesador",
+                        "Color": "Color",
+                        "Grafica": "Gráfica",
+                        "Garantia": "Garantía"
+                    }.items():
+                        valor = doc['entities'].get(key, 'N/A')
+                        if valor != "N/A":
+                            if key in ["Almacenamiento", "RAM"]:
+                                ordenador_info.append(f"**{label}**: {valor} GB")
+                            elif key == "Pulgadas":
+                                ordenador_info.append(f"**{label}**: {valor} pulgadas")
+                            else:
+                                ordenador_info.append(f"**{label}**: {valor}")
+
                     # Crear el enlace al PDF en el Blob Storage
                     pdf_filename = f"{doc['entities'].get('Codigo', 'N/A')}.pdf"
                     pdf_url = f"{blob_storage_url}/{pdf_filename}"
 
-                    # Añadir el enlace al final
-                    text_results += f"[Ver PDF aquí]( {pdf_url} )\n\n"
-                    text_results += "---\n\n"
+                    ordenador_info.append(f"[Ver PDF aquí]( {pdf_url} )")
+                    ordenador_info.append("---")
+                    
+                    text_results += "\n".join(ordenador_info) + "\n\n"
 
                 # Mostrar los resultados como texto en un solo párrafo con saltos de línea
                 st.write(text_results)
