@@ -123,19 +123,17 @@ def main():
             if results:
                 text_results = "Ordenadores encontrados:\n\n"
                 for doc in results:
-                    # Filtrar solo los productos de la marca correcta (en este caso, 'Lenovo' si el usuario pide esa marca)
-                    if marca and doc['entities'].get('Marca', '').lower() == marca.lower():
-                        detalles = []
-                        for key in ["Marca", "Modelo", "Codigo", "Precio", "Almacenamiento", "RAM", "Pulgadas", "Procesador", "Color", "Grafica", "Garantia"]:
-                            valor = doc['entities'].get(key, 'N/A')
-                            if valor != 'N/A':
-                                detalles.append(f"**{key}**: {valor}")
+                    detalles = []
+                    for key in ["Marca", "Modelo", "Codigo", "Precio", "Almacenamiento", "RAM", "Pulgadas", "Procesador", "Color", "Grafica", "Garantia"]:
+                        valor = doc['entities'].get(key, 'N/A')
+                        if valor != 'N/A':
+                            detalles.append(f"**{key}**: {valor}")
 
-                        pdf_filename = f"{doc['_id'][:-4]}.pdf"  
-                        pdf_url = f"{blob_storage_url}{pdf_filename}?{sas_token}"
-                        
-                        detalles.append(f"[Ver PDF aquí]({pdf_url})")
-                        text_results += "\n\n".join(detalles) + "\n\n---\n\n"
+                    pdf_filename = f"{doc['_id'][:-4]}.pdf"  
+                    pdf_url = f"{blob_storage_url}{pdf_filename}?{sas_token}"
+                    
+                    detalles.append(f"[Ver PDF aquí]({pdf_url})")
+                    text_results += "\n\n".join(detalles) + "\n\n---\n\n"
                 
                 st.write(text_results)
             else:
