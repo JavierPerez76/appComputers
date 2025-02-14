@@ -91,7 +91,7 @@ def main():
                         ram = ram_match.group(0)
                 elif entity["category"] == "Almacenamiento":
                     almacenamiento = str(entity["text"]).split()[0]  # Extraer el valor del almacenamiento
-                elif entity["category"] == "ComparacionAlmacenamiento":
+                elif entity["category"] == "Comparacion":
                     comparacion_almacenamiento = str(entity["text"]).lower()  # Capturar "más de" o "menos de"
 
             # Imprimir las entidades extraídas para depuración
@@ -101,50 +101,45 @@ def main():
             st.write(f"Almacenamiento: {almacenamiento}")
             st.write(f"ComparacionAlmacenamiento: {comparacion_almacenamiento}")
 
-            # Construir la consulta para MongoDB
-            query = {}
-            if pulgadas:
-                query["entities.Pulgadas"] = pulgadas
-            if marca:
-                query["entities.Marca"] = marca
-            if ram:
-                query["entities.RAM"] = ram
-
-            # Ajustar la consulta de almacenamiento usando la función parse_storage
+            # Si almacenamiento contiene un número, verificar la comparación
             if almacenamiento:
                 almacenamiento_int = parse_storage(almacenamiento)  # Convertir almacenamiento a GB si está en TB
                 if almacenamiento_int:
                     st.write(f"Almacenamiento en GB: {almacenamiento_int}")  # Mostrar el almacenamiento convertido
                     if comparacion_almacenamiento == "más de":
-                        query["entities.Almacenamiento"] = {"$gt": almacenamiento_int}
+                        query = {"entities.Almacenamiento": {"$gt": almacenamiento_int}}
                     elif comparacion_almacenamiento == "menos de":
-                        query["entities.Almacenamiento"] = {"$lt": almacenamiento_int}
+                        query = {"entities.Almacenamiento": {"$lt": almacenamiento_int}}
                     else:
-                        query["entities.Almacenamiento"] = almacenamiento_int
+                        query = {"entities.Almacenamiento": almacenamiento_int}
 
-            # Consultar en MongoDB
-            results = list(collection.find(query))
+                    # Consultar en MongoDB
+                    results = list(collection.find(query))
 
-            # Generar un texto para mostrar los resultados
-            if results:
-                text_results = "Ordenadores encontrados:\n\n"
-                for doc in results:
-                    detalles = []
-                    for key in ["Marca", "Modelo", "Codigo", "Precio", "Almacenamiento", "RAM", "Pulgadas", "Procesador", "Color", "Grafica", "Garantia"]:
-                        valor = doc['entities'].get(key, 'N/A')
-                        if valor != 'N/A':
-                            detalles.append(f"**{key}**: {valor}")
-                    
-                    pdf_filename = f"{doc['_id'][:-4]}.pdf"  
-                    pdf_url = f"{blob_storage_url}{pdf_filename}?{sas_token}"
-                    
-                    detalles.append(f"[Ver PDF aquí]({pdf_url})")
-                    text_results += "\n\n".join(detalles) + "\n\n---\n\n"
-                
-                st.write(text_results)
+                    # Generar un texto para mostrar los resultados
+                    if results:
+                        text_results = "Ordenadores encontrados:\n\n"
+                        for doc in results:
+                            detalles = []
+                            for key in ["Marca", "Modelo", "Codigo", "Precio", "Almacenamiento", "RAM", "Pulgadas", "Procesador", "Color", "Grafica", "Garantia"]:
+                                valor = doc['entities'].get(key, 'N/A')
+                                if valor != 'N/A':
+                                    detalles.append(f"**{key}**: {valor}")
+
+                            pdf_filename = f"{doc['_id'][:-4]}.pdf"  
+                            pdf_url = f"{blob_storage_url}{pdf_filename}?{sas_token}"
+
+                            detalles.append(f"[Ver PDF aquí]({pdf_url})")
+                            text_results += "\n\n".join(detalles) + "\n\n---\n\n"
+                        
+                        st.write(text_results)
+                    else:
+                        st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
+                else:
+                    st.write("No se pudo interpretar el almacenamiento correctamente.")
             else:
-                st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
-    
+                st.write("No se detectó un valor de almacenamiento válido.")
+
     except Exception as ex:
         st.error(f"Error: {ex}")
 
