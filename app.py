@@ -106,6 +106,12 @@ def main():
                     else:
                         query["entities.Almacenamiento"] = almacenamiento_int
 
+            # Comprobar si la consulta de marca no tiene coincidencias exactas
+            if marca and collection.count_documents({"entities.Marca": marca}) == 0:
+                # Si no se encuentra la marca, devolver un mensaje y evitar la consulta
+                st.write(f"No se encontraron ordenadores de la marca {marca}.")
+                return
+
             results = list(collection.find(query))
 
             if results:
@@ -131,8 +137,7 @@ def main():
 
                     st.write("---")
             else:
-                # Si no hay resultados, no mostrar "Ordenadores encontrados"
-                pass
+                st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
     
     except Exception as ex:
         st.error(f"Error: {ex}")
