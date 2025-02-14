@@ -79,8 +79,6 @@ def main():
 
             # Extraer las entidades de pulgadas, marca, RAM, comparación y almacenamiento
             for entity in entities:
-                st.write(f"Entidad detectada: {entity}")  # Imprimir las entidades detectadas para depuración
-
                 if entity["category"] == "Pulgadas":
                     pulgadas = str(entity["text"]).split()[0]  # Extraer solo el número
                 elif entity["category"] == "Marca":
@@ -93,13 +91,6 @@ def main():
                     almacenamiento = str(entity["text"]).split()[0]  # Extraer el valor del almacenamiento
                 elif entity["category"] == "ComparacionAlmacenamiento":
                     comparacion_almacenamiento = str(entity["text"]).lower()  # Capturar "más de" o "menos de"
-
-            # Imprimir las entidades extraídas para depuración
-            st.write(f"Pulgadas: {pulgadas}")
-            st.write(f"Marca: {marca}")
-            st.write(f"RAM: {ram}")
-            st.write(f"Almacenamiento: {almacenamiento}")
-            st.write(f"ComparacionAlmacenamiento: {comparacion_almacenamiento}")
 
             # Construir la consulta para MongoDB
             query = {}
@@ -114,7 +105,6 @@ def main():
             if almacenamiento:
                 almacenamiento_int = parse_storage(almacenamiento)  # Convertir almacenamiento a GB si está en TB
                 if almacenamiento_int:
-                    st.write(f"Almacenamiento en GB: {almacenamiento_int}")  # Mostrar el almacenamiento convertido
                     if comparacion_almacenamiento == "más de":
                         query["entities.Almacenamiento"] = {"$gt": almacenamiento_int}
                     elif comparacion_almacenamiento == "menos de":
@@ -148,5 +138,5 @@ def main():
     except Exception as ex:
         st.error(f"Error: {ex}")
 
-if __name__ == "__main__":
+if __name__ == "__main__":  
     main()
