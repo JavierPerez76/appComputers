@@ -5,7 +5,6 @@ from azure.ai.language.conversations import ConversationAnalysisClient
 import re
 
 def parse_storage(almacenamiento):
-    # Si almacenamiento es en TB, convertirlo a GB
     match = re.match(r'(\d+\.?\d*)\s*(GB|TB)', almacenamiento, re.IGNORECASE)
     if match:
         value = float(match.group(1))
@@ -41,7 +40,6 @@ def main():
                 ls_prediction_endpoint, AzureKeyCredential(ls_prediction_key)
             )
 
-            # Llamar al modelo del servicio de lenguaje para obtener la intención y entidades
             cls_project = 'CLUordenadores'
             deployment_slot = 'modelo'
 
@@ -70,17 +68,15 @@ def main():
             top_intent = result["result"]["prediction"]["topIntent"]
             entities = result["result"]["prediction"]["entities"]
 
-            # Inicializar las variables para las entidades
             pulgadas = None
             marca = None
             ram = None
             comparacion_almacenamiento = None
             almacenamiento = None
 
-            # Extraer las entidades de pulgadas, marca, RAM, comparación y almacenamiento
             for entity in entities:
                 if entity["category"] == "Pulgadas":
-                    pulgadas = str(entity["text"]).split()[0]  # Extraer solo el número
+                    pulgadas = str(entity["text"]).split()[0]
                 elif entity["category"] == "Marca":
                     marca = str(entity["text"])
                 elif entity["category"] == "RAM":
@@ -88,26 +84,20 @@ def main():
                     if ram_match:
                         ram = ram_match.group(0)
                 elif entity["category"] == "Almacenamiento":
-                    almacenamiento = str(entity["text"]).split()[0]  # Extraer el valor del almacenamiento
+                    almacenamiento = str(entity["text"]).split()[0]
                 elif entity["category"] == "ComparacionAlmacenamiento":
-                    comparacion_almacenamiento = str(entity["text"]).lower()  # Capturar "más de" o "menos de"
+                    comparacion_almacenamiento = str(entity["text"]).lower()
 
-            # Crear la consulta
             query = {}
-
-            # Si se encuentra la marca en la entrada del usuario, filtrar por la marca
-            if marca:
-                query["entities.Marca"] = marca
-
-            # Si el usuario también busca por otras características, como RAM, pulgadas, etc.
             if pulgadas:
                 query["entities.Pulgadas"] = pulgadas
+            if marca:
+                query["entities.Marca"] = marca
             if ram:
                 query["entities.RAM"] = ram
 
-            # Ajustar la consulta de almacenamiento si está disponible
             if almacenamiento:
-                almacenamiento_int = parse_storage(almacenamiento)  # Convertir almacenamiento a GB si está en TB
+                almacenamiento_int = parse_storage(almacenamiento)
                 if almacenamiento_int:
                     if comparacion_almacenamiento == "más de":
                         query["entities.Almacenamiento"] = {"$gt": almacenamiento_int}
@@ -116,26 +106,30 @@ def main():
                     else:
                         query["entities.Almacenamiento"] = almacenamiento_int
 
-            # Consultar en MongoDB
             results = list(collection.find(query))
 
-            # Generar un texto para mostrar los resultados
             if results:
-                text_results = "Ordenadores encontrados:\n\n"
                 for doc in results:
+                    modelo = doc['entities'].get("Modelo", "N/A")
+                    st.subheader(modelo)  # Mostrar el modelo en grande
+
+                    # Mostrar las propiedades como una lista ordenada
+                    st.write("### Propiedades del Ordenador:")
                     detalles = []
-                    for key in ["Marca", "Modelo", "Codigo", "Precio", "Almacenamiento", "RAM", "Pulgadas", "Procesador", "Color", "Grafica", "Garantia"]:
+                    for key in ["Marca", "Codigo", "Precio", "Almacenamiento", "RAM", "Pulgadas", "Procesador", "Color", "Grafica", "Garantia"]:
                         valor = doc['entities'].get(key, 'N/A')
                         if valor != 'N/A':
-                            detalles.append(f"**{key}**: {valor}")
+                            detalles.append(f"- {key}: {valor}")
 
+                    # Mostrar las propiedades
+                    st.write("\n".join(detalles))
+
+                    # Mostrar el enlace para el PDF en una línea separada
                     pdf_filename = f"{doc['_id'][:-4]}.pdf"  
                     pdf_url = f"{blob_storage_url}{pdf_filename}?{sas_token}"
-                    
-                    detalles.append(f"[Ver PDF aquí]({pdf_url})")
-                    text_results += "\n\n".join(detalles) + "\n\n---\n\n"
-                
-                st.write(text_results)
+                    st.markdown(f"[Ver PDF aquí]({pdf_url})", unsafe_allow_html=True)
+
+                    st.write("---")
             else:
                 st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
     
