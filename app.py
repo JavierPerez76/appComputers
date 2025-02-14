@@ -88,6 +88,11 @@ def main():
                 elif entity["category"] == "ComparacionAlmacenamiento":
                     comparacion_almacenamiento = str(entity["text"]).lower()
 
+            # Verificar si se ha encontrado una marca o información relevante
+            if not marca:
+                st.write("No entiendo la consulta, por favor ingresa una marca de ordenador o más detalles.")
+                return
+
             query = {}
             if pulgadas:
                 query["entities.Pulgadas"] = pulgadas
