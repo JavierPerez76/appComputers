@@ -4,6 +4,18 @@ from azure.core.credentials import AzureKeyCredential
 from azure.ai.language.conversations import ConversationAnalysisClient
 import re
 
+def parse_storage(almacenamiento):
+    # Si almacenamiento es en TB, convertirlo a GB
+    match = re.match(r'(\d+\.?\d*)\s*(GB|TB)', almacenamiento, re.IGNORECASE)
+    if match:
+        value = float(match.group(1))
+        unit = match.group(2).upper()
+        if unit == 'TB':
+            return int(value * 1000)  # Convertir TB a GB
+        elif unit == 'GB':
+            return int(value)
+    return None
+
 def main():
     try:
         # Cargar variables de entorno desde Streamlit Secrets
@@ -89,14 +101,16 @@ def main():
             if ram:
                 query["entities.RAM"] = ram
 
+            # Ajustar la consulta de almacenamiento usando la función parse_storage
             if almacenamiento:
-                almacenamiento_int = int(almacenamiento)  # Convertir a entero
-                if comparacion_almacenamiento == "más de":
-                    query["entities.Almacenamiento"] = {"$gt": almacenamiento_int}
-                elif comparacion_almacenamiento == "menos de":
-                    query["entities.Almacenamiento"] = {"$lt": almacenamiento_int}
-                else:
-                    query["entities.Almacenamiento"] = almacenamiento_int
+                almacenamiento_int = parse_storage(almacenamiento)  # Convertir almacenamiento a GB si está en TB
+                if almacenamiento_int:
+                    if comparacion_almacenamiento == "más de":
+                        query["entities.Almacenamiento"] = {"$gt": almacenamiento_int}
+                    elif comparacion_almacenamiento == "menos de":
+                        query["entities.Almacenamiento"] = {"$lt": almacenamiento_int}
+                    else:
+                        query["entities.Almacenamiento"] = almacenamiento_int
 
             # Consultar en MongoDB
             results = list(collection.find(query))
