@@ -122,7 +122,7 @@ def main():
                     if ordenador_info:
                         pdf_filename = f"{doc['entities'].get('Codigo', 'N/A')}.pdf"
                         pdf_url = f"{blob_storage_url}/{pdf_filename}"
-                        ordenador_info += f"[Ver PDF aquí]( {pdf_url} )\n\n"
+                        ordenador_info += f"[Ver ficha aquí]( {pdf_url} )\n\n"
                         ordenador_info += "---\n\n"
                         text_results += ordenador_info
 
