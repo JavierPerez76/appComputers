@@ -90,12 +90,13 @@ def main():
                 query["entities.RAM"] = ram
 
             if almacenamiento:
+                almacenamiento_int = int(almacenamiento)  # Convertir a entero
                 if comparacion_almacenamiento == "más de":
-                    query["entities.Almacenamiento"] = {"$gt": int(almacenamiento)}
+                    query["entities.Almacenamiento"] = {"$gt": almacenamiento_int}
                 elif comparacion_almacenamiento == "menos de":
-                    query["entities.Almacenamiento"] = {"$lt": int(almacenamiento)}
+                    query["entities.Almacenamiento"] = {"$lt": almacenamiento_int}
                 else:
-                    query["entities.Almacenamiento"] = int(almacenamiento)
+                    query["entities.Almacenamiento"] = almacenamiento_int
 
             # Consultar en MongoDB
             results = list(collection.find(query))
@@ -110,7 +111,6 @@ def main():
                         if valor != 'N/A':
                             detalles.append(f"**{key}**: {valor}")
                     
-                    # Generar la URL del PDF
                     pdf_filename = f"{doc['_id'][:-4]}.pdf"  
                     pdf_url = f"{blob_storage_url}{pdf_filename}?{sas_token}"
                     
