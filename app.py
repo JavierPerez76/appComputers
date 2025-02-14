@@ -131,7 +131,8 @@ def main():
 
                     st.write("---")
             else:
-                st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
+                # Si no hay resultados, no mostrar "Ordenadores encontrados"
+                pass
     
     except Exception as ex:
         st.error(f"Error: {ex}")
