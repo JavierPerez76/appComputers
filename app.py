@@ -62,8 +62,10 @@ def main():
             pulgadas = None
             marca = None
             ram = None
+            almacenamiento = None
+            almacenamiento_comparacion = None
 
-            # Extraer las entidades de pulgadas, marca y RAM
+            # Extraer las entidades de pulgadas, marca, RAM y almacenamiento
             for entity in entities:
                 if entity["category"] == "Pulgadas":
                     pulgadas = str(entity["text"]).split()[0]  # Extraer solo el número
@@ -73,6 +75,12 @@ def main():
                     ram_match = re.search(r'\d+', str(entity["text"]))
                     if ram_match:
                         ram = ram_match.group(0)
+                elif entity["category"] == "Almacenamiento":
+                    almacenamiento_match = re.search(r'\d+', str(entity["text"]))
+                    if almacenamiento_match:
+                        almacenamiento = int(almacenamiento_match.group(0))
+                elif entity["category"] == "ComparacionAlmacenamiento":
+                    almacenamiento_comparacion = str(entity["text"]).lower()
 
             # Construir la consulta para MongoDB
             query = {}
@@ -82,6 +90,13 @@ def main():
                 query["entities.Marca"] = marca
             if ram:
                 query["entities.RAM"] = ram
+
+            # Manejo de la comparación de almacenamiento
+            if almacenamiento and almacenamiento_comparacion:
+                if "más" in almacenamiento_comparacion:
+                    query["entities.Almacenamiento"] = {"$gte": almacenamiento}
+                elif "menos" in almacenamiento_comparacion:
+                    query["entities.Almacenamiento"] = {"$lte": almacenamiento}
 
             # Consultar en MongoDB
             results = list(collection.find(query))
