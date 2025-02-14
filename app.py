@@ -110,6 +110,7 @@ def main():
                         if valor != 'N/A':
                             detalles.append(f"**{key}**: {valor}")
                     
+                    # Generar la URL del PDF
                     pdf_filename = f"{doc['_id'][:-4]}.pdf"  
                     pdf_url = f"{blob_storage_url}{pdf_filename}?{sas_token}"
                     
