@@ -62,10 +62,10 @@ def main():
             pulgadas = None
             marca = None
             ram = None
+            comparacion_almacenamiento = None
             almacenamiento = None
-            almacenamiento_comparacion = None
 
-            # Extraer las entidades de pulgadas, marca, RAM y almacenamiento
+            # Extraer las entidades de pulgadas, marca, RAM, comparación y almacenamiento
             for entity in entities:
                 if entity["category"] == "Pulgadas":
                     pulgadas = str(entity["text"]).split()[0]  # Extraer solo el número
@@ -76,11 +76,9 @@ def main():
                     if ram_match:
                         ram = ram_match.group(0)
                 elif entity["category"] == "Almacenamiento":
-                    almacenamiento_match = re.search(r'\d+', str(entity["text"]))
-                    if almacenamiento_match:
-                        almacenamiento = int(almacenamiento_match.group(0))
+                    almacenamiento = str(entity["text"]).split()[0]  # Extraer el valor del almacenamiento
                 elif entity["category"] == "ComparacionAlmacenamiento":
-                    almacenamiento_comparacion = str(entity["text"]).lower()
+                    comparacion_almacenamiento = str(entity["text"]).lower()  # Capturar "más de" o "menos de"
 
             # Construir la consulta para MongoDB
             query = {}
@@ -91,15 +89,13 @@ def main():
             if ram:
                 query["entities.RAM"] = ram
 
-            # Manejo de la comparación de almacenamiento
-            if almacenamiento_comparacion:
-                if "más" in almacenamiento_comparacion:
-                    # Si el usuario pide más de, transformamos el valor en GB
-                    if almacenamiento:
-                        query["entities.Almacenamiento"] = {"$gte": almacenamiento}
-                elif "menos" in almacenamiento_comparacion:
-                    if almacenamiento:
-                        query["entities.Almacenamiento"] = {"$lte": almacenamiento}
+            if almacenamiento:
+                if comparacion_almacenamiento == "más de":
+                    query["entities.Almacenamiento"] = {"$gt": int(almacenamiento)}
+                elif comparacion_almacenamiento == "menos de":
+                    query["entities.Almacenamiento"] = {"$lt": int(almacenamiento)}
+                else:
+                    query["entities.Almacenamiento"] = int(almacenamiento)
 
             # Consultar en MongoDB
             results = list(collection.find(query))
