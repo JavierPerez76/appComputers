@@ -113,7 +113,7 @@ def main():
                     modelo = doc['entities'].get("Modelo", "N/A")
                     st.subheader(f"**{modelo}**")  # Mostrar el modelo en grande
 
-                    # Mostrar las propiedades como una lista
+                    # Mostrar las propiedades como una lista ordenada
                     st.write("### Propiedades del Ordenador:")
                     detalles = []
                     for key in ["Marca", "Codigo", "Precio", "Almacenamiento", "RAM", "Pulgadas", "Procesador", "Color", "Grafica", "Garantia"]:
@@ -121,13 +121,14 @@ def main():
                         if valor != 'N/A':
                             detalles.append(f"- **{key}**: {valor}")
 
-                    # PDF link
+                    # Mostrar las propiedades
+                    st.write("\n".join(detalles))
+
+                    # Mostrar el enlace para el PDF en una línea separada
                     pdf_filename = f"{doc['_id'][:-4]}.pdf"  
                     pdf_url = f"{blob_storage_url}{pdf_filename}?{sas_token}"
-                    detalles.append(f"[Ver PDF aquí]({pdf_url})")
+                    st.markdown(f"[**Ver PDF aquí**]({pdf_url})", unsafe_allow_html=True)
 
-                    # Mostrar los detalles
-                    st.write("\n".join(detalles))
                     st.write("---")
             else:
                 st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
