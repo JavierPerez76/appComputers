@@ -50,3 +50,8 @@ Lenovo
 Apple
 LG
 Quiero un ordenador marca Lenovo
+Quiero un ordenador marca LG
+Quiero un ordenador marca Apple
+Quiero un ordenador de marca LG
+Quiero un ordenador de marca Lenovo
+Quiero un ordenador de marca Apple
