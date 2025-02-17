@@ -152,17 +152,21 @@ def main():
                     st.markdown(f"[Ver PDF aquí]({pdf_url})", unsafe_allow_html=True)
 
                     st.write("---")
+
+                # Traducir los resultados a otro idioma
+                if idioma != "Español":
+                    idioma_mapeado = {"Inglés": "en", "Francés": "fr", "Chino": "zh", "Ruso": "ru"}[idioma]
+                    
+                    # Traducir título
+                    translated_title = translate_text(st.session_state.title, idioma_mapeado, translation_endpoint, translation_key)
+                    st.title(translated_title)
+
+                    # Traducir resultados
+                    translated_results = translate_text("\n".join(detalles), idioma_mapeado, translation_endpoint, translation_key)
+                    st.write(translated_results)
+
             else:
                 st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
-
-            # Traducir todo el contenido a otro idioma
-            if idioma != "Español":
-                idioma_mapeado = {"Inglés": "en", "Francés": "fr", "Chino": "zh", "Ruso": "ru"}[idioma]
-                translated_title = translate_text(st.session_state.title, idioma_mapeado, translation_endpoint, translation_key)
-                st.title(translated_title)
-
-                translated_results = translate_text("\n".join(detalles), idioma_mapeado, translation_endpoint, translation_key)
-                st.write(translated_results)
 
     except Exception as ex:
         st.error(f"Error: {ex}")
