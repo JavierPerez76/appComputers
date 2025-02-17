@@ -11,9 +11,9 @@ def parse_storage(almacenamiento):
         value = float(match.group(1))
         unit = match.group(2).upper()
         if unit == 'TB':
-            return value * 1000  # Convertir TB a GB (mantener como número decimal para mayor precisión)
+            return int(value * 1000)  # Convertir TB a GB
         elif unit == 'GB':
-            return value
+            return int(value)
     return None
 
 def main():
@@ -92,7 +92,6 @@ def main():
             comparacion_almacenamiento = None
             almacenamiento = None
             color = None  # Añadimos una variable para el color
-            codigo = None  # Añadimos una variable para el código
 
             for entity in entities:
                 if entity["category"] == "Pulgadas":
@@ -109,8 +108,6 @@ def main():
                     comparacion_almacenamiento = str(entity["text"]).lower()
                 elif entity["category"] == "Color":  # Detectar color
                     color = str(entity["text"]).lower()
-                elif entity["category"] == "Codigo":  # Detectar código
-                    codigo = str(entity["text"])
 
             query = {}
             if pulgadas:
@@ -119,13 +116,12 @@ def main():
                 query["entities.Marca"] = marca
             if ram:
                 query["entities.RAM"] = ram
-            if color:
+            if color:  # Si hay color, agregarlo a la consulta
                 query["entities.Color"] = color
-            if codigo:  # Agregar el código a la consulta
-                query["entities.Codigo"] = codigo
 
             if almacenamiento:
                 almacenamiento_int = parse_storage(almacenamiento)
+                st.write(f"Valor de almacenamiento procesado: {almacenamiento_int}")  # Imprimir valor de almacenamiento
                 if almacenamiento_int:
                     if comparacion_almacenamiento == "más de":
                         query["entities.Almacenamiento"] = {"$gt": almacenamiento_int}
