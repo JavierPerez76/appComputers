@@ -11,9 +11,9 @@ def parse_storage(almacenamiento):
         value = float(match.group(1))
         unit = match.group(2).upper()
         if unit == 'TB':
-            return int(value * 1000)  # Convertir TB a GB
+            return value * 1000  # Convertir TB a GB (mantener como número decimal para mayor precisión)
         elif unit == 'GB':
-            return int(value)
+            return value
     return None
 
 def main():
