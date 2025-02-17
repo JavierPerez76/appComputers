@@ -1,20 +1,48 @@
-¿Cuáles son los ordenadores LG con 16 pulgadas?
-¿Qué ordenadores tienen 32GB de RAM y 1TB de almacenamiento?
-¿Hay algún ordenador Dell con pantalla de 14 pulgadas?
-¿Cuál es el precio de un ordenador Lenovo con procesador Intel Core?
-¿Qué ordenadores tienen un procesador Intel Core i7?
-¿Qué ordenadores tienen 512GB de almacenamiento?
-¿Puedes mostrarme ordenadores con tarjeta gráfica GeForce RTX?
-¿Hay algún ordenador con 16 pulgadas de pantalla y almacenamiento de 1TB?
-¿Qué ordenadores LG tienen menos de 16 pulgadas?
-¿Hay algún ordenador Lenovo con 14 pulgadas y 32GB de RAM?
-¿Qué ordenadores tienen almacenamiento superior a 1TB?
-¿Me puedes enseñar ordenadores Apple con procesador M?
-¿Hay alguna marca de ordenador con 32GB de RAM y 14 pulgadas?
-¿Puedes encontrar un ordenador Dell con gráficos Intel Arc?
-¿Qué ordenadores tienen 14 pulgadas y procesador Intel Core?
-¿Cuál es el ordenador más barato con 32GB de RAM?
-¿Hay algún ordenador Samsung con gráficos GeForce RTX 4070?
-¿Tienes ordenadores con 13 pulgadas y procesador Intel?
-¿Mostrarme un ordenador de marca Microsoft con pantalla de 13,5 pulgadas?
-¿Qué ordenadores tienen 1TB de almacenamiento y menos de 2.500 euros?
+Quiero un ordenador de 15 pulgadas
+Quiero un ordenador de 17 pulgadas
+Quiero un ordenador de 14,5 pulgadas
+Quiero un ordenador de 14,2 pulgadas
+Quiero un ordenador de 16 pulgadas
+Quiero un ordenador de 13 pulgadas
+Quiero un ordenador de 14,4 pulgadas
+Quiero un ordenador de 13,5 pulgadas
+Busca un ordenador con 32GB de RAM
+Quiero un ordenador con 36GB de RAM
+Busca el ordenador con el código 16Z90R-E.AD78B
+Busca el ordenador con el código 17Z90R-E.AD78B
+Busca el ordenador con el código 21KE002YSP
+Busca el ordenador con el código 21KE003JSP
+Busca el ordenador con el código 21KE003VSP
+Busca el ordenador con el código DTPF3
+Busca el ordenador con el código FMDDY
+Busca el ordenador con el código GN4X0
+Busca el ordenador con el código MX2G3Y_A
+Busca el ordenador con el código NP960XGL-XG1ES
+Busca el ordenador con el código NP960XGL-XG2ES
+Busca el ordenador con el código Y6B-00005
+Busca el ordenador con el código Z1T-00012
+Busca el ordenador con el código ZKB-00012
+Me gustaría un ordenador de 15 pulgadas
+Estoy buscando un ordenador de 17 pulgadas
+Quiero un ordenador con una pantalla de 14,5 pulgadas
+Estoy interesado en un ordenador de 14,2 pulgadas
+Busco un ordenador con pantalla de 16 pulgadas
+Quisiera un ordenador de 13 pulgadas
+Necesito un ordenador de 14,4 pulgadas
+Me gustaría un ordenador con pantalla de 13,5 pulgadas
+Encuentra un ordenador con 32GB de RAM
+Estoy buscando un ordenador con 36GB de RAM
+Quiero encontrar el ordenador con el código 16Z90R-E.AD78B
+Busco el ordenador con el código 17Z90R-E.AD78B
+Estoy buscando el ordenador con el código 21KE002YSP
+Encuentra el ordenador con el código 21KE003JSP
+Busco el ordenador con el código 21KE003VSP
+Quisiera encontrar el ordenador con el código DTPF3
+Estoy buscando el ordenador con el código FMDDY
+Encuentra el ordenador con el código GN4X0
+Busco el ordenador con el código MX2G3Y_A
+Encuentra el ordenador con el código NP960XGL-XG1ES
+Estoy buscando el ordenador con el código NP960XGL-XG2ES
+Quiero el ordenador con el código Y6B-00005
+Busco el ordenador con el código Z1T-00012
+Encuentra el ordenador con el código ZKB-00012
