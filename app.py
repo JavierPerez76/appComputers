@@ -18,9 +18,11 @@ def parse_storage(almacenamiento):
 
 def translate_text(text, target_language, translation_endpoint, translation_key):
     try:
+        # Crear cliente para Azure Translator
         translation_client = TextTranslationClient(
             endpoint=translation_endpoint, credential=AzureKeyCredential(translation_key)
         )
+        # Traducir el texto
         response = translation_client.translate(text=text, target_languages=[target_language])
         return response[0].translations[0].text
     except Exception as ex:
