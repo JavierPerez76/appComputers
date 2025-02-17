@@ -22,8 +22,15 @@ def translate_text(text, target_language, translation_endpoint, translation_key)
         translation_client = TextTranslationClient(
             endpoint=translation_endpoint, credential=AzureKeyCredential(translation_key)
         )
+        
+        # Preparar el texto para la traducción
+        translation_input = [{"text": text}]
+        
         # Traducir el texto
-        response = translation_client.translate(text=text, target_languages=[target_language])
+        response = translation_client.translate(
+            content=translation_input, 
+            target_languages=[target_language]
+        )
         return response[0].translations[0].text
     except Exception as ex:
         st.error(f"Error en la traducción: {ex}")
