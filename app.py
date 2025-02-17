@@ -116,16 +116,24 @@ def main():
 
             if results:
                 for doc in results:
-                    modelo = doc['entities'].get("Modelo", "N/A")
+                    # Comprobar si la clave 'entities' existe
+                    if 'entities' in doc:
+                        modelo = doc['entities'].get("Modelo", "N/A")
+                    else:
+                        modelo = "N/A"  # Valor por defecto si no existe 'entities'
+
                     st.subheader(modelo)  # Mostrar el modelo en grande
 
                     # Mostrar las propiedades como una lista ordenada
                     st.write("### Propiedades del Ordenador:")
                     detalles = []
                     for key in ["Marca", "Codigo", "Precio", "Almacenamiento", "RAM", "Pulgadas", "Procesador", "Color", "Grafica", "Garantia"]:
-                        valor = doc['entities'].get(key, 'N/A')
-                        if valor != 'N/A':
-                            detalles.append(f"- {key}: {valor}")
+                        if 'entities' in doc:  # Verificar que 'entities' esté presente
+                            valor = doc['entities'].get(key, 'N/A')
+                            if valor != 'N/A':
+                                detalles.append(f"- {key}: {valor}")
+                        else:
+                            detalles.append(f"- {key}: N/A")  # Si no existe 'entities', poner N/A
 
                     # Mostrar las propiedades
                     st.write("\n".join(detalles))
