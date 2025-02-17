@@ -74,6 +74,7 @@ def main():
             comparacion_almacenamiento = None
             almacenamiento = None
             color = None  # Añadimos una variable para el color
+            codigo = None  # Variable para el código
 
             for entity in entities:
                 if entity["category"] == "Pulgadas":
@@ -90,6 +91,8 @@ def main():
                     comparacion_almacenamiento = str(entity["text"]).lower()
                 elif entity["category"] == "Color":  # Detectar color
                     color = str(entity["text"]).lower()
+                elif entity["category"] == "Codigo":  # Detectar código
+                    codigo = str(entity["text"])
 
             query = {}
             if pulgadas:
@@ -100,6 +103,8 @@ def main():
                 query["entities.RAM"] = ram
             if color:  # Si hay color, agregarlo a la consulta
                 query["entities.Color"] = color
+            if codigo:  # Si hay código, agregarlo a la consulta
+                query["entities.Codigo"] = codigo
 
             if almacenamiento:
                 almacenamiento_int = parse_storage(almacenamiento)
