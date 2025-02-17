@@ -115,6 +115,10 @@ def main():
 
             if results:
                 for doc in results:
+                    # Verificar que 'entities' exista en el documento
+                    if 'entities' not in doc:
+                        continue
+
                     modelo = doc['entities'].get("Modelo", "N/A")
                     st.subheader(modelo)  # Mostrar el modelo en grande
 
