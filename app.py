@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.language.conversations import ConversationAnalysisClient
 import re
+import random
 
 def parse_storage(almacenamiento):
     match = re.match(r'(\d+\.?\d*)\s*(GB|TB)', almacenamiento, re.IGNORECASE)
@@ -14,6 +15,15 @@ def parse_storage(almacenamiento):
         elif unit == 'GB':
             return int(value)
     return None
+
+def load_questions():
+    try:
+        with open('questions.txt', 'r', encoding='utf-8') as file:
+            questions = file.readlines()
+        return [q.strip() for q in questions]
+    except FileNotFoundError:
+        st.error("El archivo 'questions.txt' no se encuentra.")
+        return []
 
 def main():
     try:
@@ -29,8 +39,19 @@ def main():
         db = client["mongodb"]
         collection = db["computer"]
 
+        # Cargar preguntas desde el archivo questions.txt
+        questions = load_questions()
+
         st.title("Buscador de Ordenadores")
 
+        # Botón para pregunta aleatoria
+        if st.button('Random Question'):
+            if questions:
+                random_question = random.choice(questions)
+                st.text_input("¿Qué tipo de ordenador buscas?", value=random_question)
+            else:
+                st.error("No se han cargado preguntas.")
+        
         # Pedir entrada al usuario
         user_input = st.text_input("¿Qué tipo de ordenador buscas?", "")
 
@@ -115,10 +136,6 @@ def main():
 
             if results:
                 for doc in results:
-                    # Verificar que 'entities' exista en el documento
-                    if 'entities' not in doc:
-                        continue
-
                     modelo = doc['entities'].get("Modelo", "N/A")
                     st.subheader(modelo)  # Mostrar el modelo en grande
 
