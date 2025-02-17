@@ -1,6 +1,6 @@
-
 import streamlit as st
 from pymongo import MongoClient
+import fitz  # PyMuPDF
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.language.conversations import ConversationAnalysisClient
 import re
@@ -16,129 +16,75 @@ def parse_storage(almacenamiento):
             return int(value)
     return None
 
+def extract_pdf_text(pdf_file):
+    # Extrae texto de un PDF usando PyMuPDF
+    doc = fitz.open(pdf_file)
+    text = ""
+    for page in doc:
+        text += page.get_text()
+    return text
+
 def main():
     try:
-        # Cargar variables de entorno desde Streamlit Secrets
+        # Cargar variables de entorno
         ls_prediction_endpoint = st.secrets['azure_endpoint']
         ls_prediction_key = st.secrets['azure_key']
         mongodb_connection_string = st.secrets['mongodb_connection_string']
         blob_storage_url = st.secrets['blob_storage_url']
         sas_token = st.secrets['sas_token']
 
-        # Conectar a MongoDB con la connection string
+        # Conectar a MongoDB
         client = MongoClient(mongodb_connection_string)  
         db = client["mongodb"]
         collection = db["computer"]
 
         st.title("Buscador de Ordenadores")
 
-        # Pedir entrada al usuario
-        user_input = st.text_input("¿Qué tipo de ordenador buscas?", "")
+        # Subir un archivo PDF
+        uploaded_pdf = st.file_uploader("Sube un archivo PDF con las características del ordenador", type=["pdf"])
 
-        if user_input:
-            # Crear un cliente para el modelo del servicio de lenguaje en Azure
-            language_client = ConversationAnalysisClient(
-                ls_prediction_endpoint, AzureKeyCredential(ls_prediction_key)
-            )
+        if uploaded_pdf:
+            # Extraer texto del PDF
+            pdf_text = extract_pdf_text(uploaded_pdf)
+            st.write("Texto extraído del PDF:")
+            st.write(pdf_text)
 
-            cls_project = 'CLUordenadores'
-            deployment_slot = 'modelo'
+            # Procesar el texto para obtener las características
+            # Aquí agregas el código para extraer las características de las entidades
+            # Similar a lo que ya tienes con el análisis de lenguaje
 
-            with language_client:
-                result = language_client.analyze_conversation(
-                    task={
-                        "kind": "Conversation",
-                        "analysisInput": {
-                            "conversationItem": {
-                                "participantId": "1",
-                                "id": "1",
-                                "modality": "text",
-                                "language": "es",
-                                "text": user_input
-                            },
-                            "isLoggingEnabled": False
-                        },
-                        "parameters": {
-                            "projectName": cls_project,
-                            "deploymentName": deployment_slot,
-                            "verbose": True
-                        }
-                    }
-                )
+            # Ejemplo: si el texto contiene características específicas
+            marca = "Ejemplo Marca"
+            ram = "16GB"
+            almacenamiento = "512GB"
+            color = "Negro"
 
-            top_intent = result["result"]["prediction"]["topIntent"]
-            entities = result["result"]["prediction"]["entities"]
+            # Aquí puedes guardar la información extraída en MongoDB
+            collection.insert_one({
+                "marca": marca,
+                "ram": ram,
+                "almacenamiento": almacenamiento,
+                "color": color
+            })
 
-            pulgadas = None
-            marca = None
-            ram = None
-            comparacion_almacenamiento = None
-            almacenamiento = None
-            color = None  # Añadimos una variable para el color
+            st.write("El ordenador se ha añadido correctamente a la base de datos.")
 
-            for entity in entities:
-                if entity["category"] == "Pulgadas":
-                    pulgadas = str(entity["text"]).split()[0]
-                elif entity["category"] == "Marca":
-                    marca = str(entity["text"])
-                elif entity["category"] == "RAM":
-                    ram_match = re.search(r'\d+', str(entity["text"]))
-                    if ram_match:
-                        ram = ram_match.group(0)
-                elif entity["category"] == "Almacenamiento":
-                    almacenamiento = str(entity["text"]).split()[0]
-                elif entity["category"] == "ComparacionAlmacenamiento":
-                    comparacion_almacenamiento = str(entity["text"]).lower()
-                elif entity["category"] == "Color":  # Detectar color
-                    color = str(entity["text"]).lower()
-
-            query = {}
-            if pulgadas:
-                query["entities.Pulgadas"] = pulgadas
-            if marca:
-                query["entities.Marca"] = marca
-            if ram:
-                query["entities.RAM"] = ram
-            if color:  # Si hay color, agregarlo a la consulta
-                query["entities.Color"] = color
-
-            if almacenamiento:
-                almacenamiento_int = parse_storage(almacenamiento)
-                if almacenamiento_int:
-                    if comparacion_almacenamiento == "más de":
-                        query["entities.Almacenamiento"] = {"$gt": almacenamiento_int}
-                    elif comparacion_almacenamiento == "menos de":
-                        query["entities.Almacenamiento"] = {"$lt": almacenamiento_int}
-                    else:
-                        query["entities.Almacenamiento"] = almacenamiento_int
+            # Realizar una búsqueda para encontrar un ordenador con esas características
+            query = {
+                "marca": marca,
+                "ram": ram,
+                "almacenamiento": parse_storage(almacenamiento)
+            }
 
             results = list(collection.find(query))
 
             if results:
+                st.write("Ordenadores encontrados:")
                 for doc in results:
-                    modelo = doc['entities'].get("Modelo", "N/A")
-                    st.subheader(modelo)  # Mostrar el modelo en grande
-
-                    # Mostrar las propiedades como una lista ordenada
-                    st.write("### Propiedades del Ordenador:")
-                    detalles = []
-                    for key in ["Marca", "Codigo", "Precio", "Almacenamiento", "RAM", "Pulgadas", "Procesador", "Color", "Grafica", "Garantia"]:
-                        valor = doc['entities'].get(key, 'N/A')
-                        if valor != 'N/A':
-                            detalles.append(f"- {key}: {valor}")
-
-                    # Mostrar las propiedades
-                    st.write("\n".join(detalles))
-
-                    # Mostrar el enlace para el PDF en una línea separada
-                    pdf_filename = f"{doc['_id'][:-4]}.pdf"  
-                    pdf_url = f"{blob_storage_url}{pdf_filename}?{sas_token}"
-                    st.markdown(f"[Ver PDF aquí]({pdf_url})", unsafe_allow_html=True)
-
-                    st.write("---")
+                    st.write(f"Marca: {doc['marca']}, RAM: {doc['ram']}, Almacenamiento: {doc['almacenamiento']}, Color: {doc['color']}")
             else:
-                st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
-    
+                st.write("No se encontraron ordenadores que coincidan con las características.")
+
     except Exception as ex:
         st.error(f"Error: {ex}")
 
