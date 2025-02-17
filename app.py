@@ -139,7 +139,7 @@ def main():
                     st.write("\n".join(detalles))
 
                     # Mostrar el enlace para el PDF en una línea separada
-                    pdf_filename = f"{doc['_id'][:-4]}.pdf"  
+                    pdf_filename = f"{str(doc['_id'])[:-4]}.pdf"  # Convertir ObjectId a string
                     pdf_url = f"{blob_storage_url}{pdf_filename}?{sas_token}"
                     st.markdown(f"[Ver PDF aquí]({pdf_url})", unsafe_allow_html=True)
 
