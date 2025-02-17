@@ -86,6 +86,9 @@ def main():
             top_intent = result["result"]["prediction"]["topIntent"]
             entities = result["result"]["prediction"]["entities"]
 
+            st.write(f"Intento superior: {top_intent}")
+            st.write(f"Entidades extraídas: {entities}")
+
             pulgadas = None
             marca = None
             ram = None
@@ -128,6 +131,9 @@ def main():
                         query["entities.Almacenamiento"] = {"$lt": almacenamiento_int}
                     else:
                         query["entities.Almacenamiento"] = almacenamiento_int
+
+            # Mostrar el query para depuración
+            st.write(f"Consulta realizada: {query}")
 
             results = list(collection.find(query))
 
