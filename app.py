@@ -38,6 +38,10 @@ def main():
         db = client["mongodb"]
         collection = db["computer"]
 
+        # Variables para Azure
+        cls_project = 'CLUordenadores'
+        deployment_slot = 'modelo'
+
         st.title("Buscador de Ordenadores")
 
         # Pedir entrada al usuario
@@ -48,9 +52,6 @@ def main():
             language_client = ConversationAnalysisClient(
                 ls_prediction_endpoint, AzureKeyCredential(ls_prediction_key)
             )
-
-            cls_project = 'CLUordenadores'
-            deployment_slot = 'modelo'
 
             with language_client:
                 result = language_client.analyze_conversation(
