@@ -1,8 +1,19 @@
-def parse_price(precio):
-    # Extract price value (assuming format '3.849,00' for example)
-    match = re.match(r'(\d+\.?\d*)\s*[,\.]?\d*\s*$', precio)
+import streamlit as st
+from pymongo import MongoClient
+from azure.core.credentials import AzureKeyCredential
+from azure.ai.language.conversations import ConversationAnalysisClient
+import re
+import traceback
+
+def parse_storage(almacenamiento):
+    match = re.match(r'(\d+\.?\d*)\s*(GB|TB)', almacenamiento, re.IGNORECASE)
     if match:
-        return float(match.group(1).replace(",", "."))
+        value = float(match.group(1))
+        unit = match.group(2).upper()
+        if unit == 'TB':
+            return int(value * 1000)  # Convertir TB a GB
+        elif unit == 'GB':
+            return int(value)
     return None
 
 def main():
@@ -64,9 +75,6 @@ def main():
             comparacion_almacenamiento = None
             almacenamiento = None
             color = None  # Añadimos una variable para el color
-            codigo = None  # Variable para el código
-            comparacion_precio = None
-            precio = None
 
             for entity in entities:
                 if entity["category"] == "Pulgadas":
@@ -83,12 +91,6 @@ def main():
                     comparacion_almacenamiento = str(entity["text"]).lower()
                 elif entity["category"] == "Color":  # Detectar color
                     color = str(entity["text"]).lower()
-                elif entity["category"] == "Codigo":  # Detectar código
-                    codigo = str(entity["text"])
-                elif entity["category"] == "Precio":  # Detectar precio
-                    precio = str(entity["text"]).split()[0]
-                elif entity["category"] == "ComparacionPrecio":  # Comparación de precio
-                    comparacion_precio = str(entity["text"]).lower()
 
             query = {}
             if pulgadas:
@@ -99,8 +101,6 @@ def main():
                 query["entities.RAM"] = ram
             if color:  # Si hay color, agregarlo a la consulta
                 query["entities.Color"] = color
-            if codigo:  # Si hay código, agregarlo a la consulta
-                query["entities.Codigo"] = codigo
 
             if almacenamiento:
                 almacenamiento_int = parse_storage(almacenamiento)
@@ -111,17 +111,6 @@ def main():
                         query["entities.Almacenamiento"] = {"$lt": almacenamiento_int}
                     else:
                         query["entities.Almacenamiento"] = almacenamiento_int
-
-            # Si se especifica un precio y una comparación
-            if precio:
-                precio_float = parse_price(precio)
-                if precio_float:
-                    if comparacion_precio == "menos de":
-                        query["entities.Precio"] = {"$lt": precio_float}
-                    elif comparacion_precio == "más de":
-                        query["entities.Precio"] = {"$gt": precio_float}
-                    else:
-                        query["entities.Precio"] = precio_float
 
             results = list(collection.find(query))
 
@@ -151,7 +140,12 @@ def main():
                 st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
     
     except Exception as ex:
-        st.error(f"Error: {ex}")
+        # Para ver más detalles de la excepción
+        st.error(f"Ha ocurrido un error: {ex}")
+        st.write(f"Detalles del error: {str(ex)}")  # Mostrar más detalles
+        # También puedes agregar un traceback para ver de dónde proviene
+        st.write("Detalles del traceback:")
+        st.write(traceback.format_exc())  # Muestra el traceback completo
 
 if __name__ == "__main__":  
     main()
