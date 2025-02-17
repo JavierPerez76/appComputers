@@ -3,7 +3,6 @@ from pymongo import MongoClient
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.language.conversations import ConversationAnalysisClient
 import re
-import traceback
 
 def parse_storage(almacenamiento):
     match = re.match(r'(\d+\.?\d*)\s*(GB|TB)', almacenamiento, re.IGNORECASE)
@@ -116,30 +115,22 @@ def main():
 
             if results:
                 for doc in results:
-                    # Comprobar si la clave 'entities' existe
-                    if 'entities' in doc:
-                        modelo = doc['entities'].get("Modelo", "N/A")
-                    else:
-                        modelo = "N/A"  # Valor por defecto si no existe 'entities'
-
+                    modelo = doc['entities'].get("Modelo", "N/A")
                     st.subheader(modelo)  # Mostrar el modelo en grande
 
                     # Mostrar las propiedades como una lista ordenada
                     st.write("### Propiedades del Ordenador:")
                     detalles = []
                     for key in ["Marca", "Codigo", "Precio", "Almacenamiento", "RAM", "Pulgadas", "Procesador", "Color", "Grafica", "Garantia"]:
-                        if 'entities' in doc:  # Verificar que 'entities' esté presente
-                            valor = doc['entities'].get(key, 'N/A')
-                            if valor != 'N/A':
-                                detalles.append(f"- {key}: {valor}")
-                        else:
-                            detalles.append(f"- {key}: N/A")  # Si no existe 'entities', poner N/A
+                        valor = doc['entities'].get(key, 'N/A')
+                        if valor != 'N/A':
+                            detalles.append(f"- {key}: {valor}")
 
                     # Mostrar las propiedades
                     st.write("\n".join(detalles))
 
                     # Mostrar el enlace para el PDF en una línea separada
-                    pdf_filename = f"{str(doc['_id'])[:-4]}.pdf"  # Convertir ObjectId a string
+                    pdf_filename = f"{doc['_id'][:-4]}.pdf"  
                     pdf_url = f"{blob_storage_url}{pdf_filename}?{sas_token}"
                     st.markdown(f"[Ver PDF aquí]({pdf_url})", unsafe_allow_html=True)
 
@@ -148,12 +139,7 @@ def main():
                 st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
     
     except Exception as ex:
-        # Para ver más detalles de la excepción
-        st.error(f"Ha ocurrido un error: {ex}")
-        st.write(f"Detalles del error: {str(ex)}")  # Mostrar más detalles
-        # También puedes agregar un traceback para ver de dónde proviene
-        st.write("Detalles del traceback:")
-        st.write(traceback.format_exc())  # Muestra el traceback completo
+        st.error(f"Error: {ex}")
 
 if __name__ == "__main__":  
     main()
