@@ -71,6 +71,7 @@ def main():
 
             # Procesar cada fragmento de texto con CLU
             for fragment in text_fragments:
+                # Aquí nos aseguramos de que la llamada se realice dentro del bloque 'with'
                 with language_client:
                     result = language_client.analyze_conversation(
                         task={
