@@ -3,6 +3,7 @@ from azure.core.credentials import AzureKeyCredential
 from pymongo import MongoClient
 from azure.ai.translation import TextTranslationClient
 import streamlit as st
+import re
 
 def translate_text(text, target_language, translation_endpoint, translation_key):
     try:
@@ -23,6 +24,13 @@ def translate_text(text, target_language, translation_endpoint, translation_key)
     except Exception as ex:
         st.error(f"Error en la traducción: {ex}")
         return text
+
+def parse_storage(almacenamiento):
+    try:
+        # Intentar convertir el almacenamiento a un número entero
+        return int(almacenamiento)
+    except ValueError:
+        return None
 
 def main():
     try:
