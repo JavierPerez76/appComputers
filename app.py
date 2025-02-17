@@ -51,7 +51,11 @@ def main():
         user_input = st.text_input("¿Qué tipo de ordenador buscas?", "")
 
         # Selección del idioma
-        idioma = st.selectbox("Selecciona un idioma para traducir:", ["Inglés", "Francés", "Chino", "Ruso"])
+        idioma = st.selectbox("Selecciona un idioma para traducir:", ["Español", "Inglés", "Francés", "Chino", "Ruso"])
+
+        # Inicializar título en el estado de la sesión para evitar el error
+        if "title" not in st.session_state:
+            st.session_state.title = "Buscador de Ordenadores"
 
         if user_input:
             # Crear un cliente para el modelo del servicio de lenguaje en Azure
@@ -155,7 +159,7 @@ def main():
 
                     st.write("---")
 
-                # Traducir los resultados a otro idioma
+                # Traducir los resultados si el idioma no es español
                 if idioma != "Español":
                     idioma_mapeado = {"Inglés": "en", "Francés": "fr", "Chino": "zh", "Ruso": "ru"}[idioma]
                     
