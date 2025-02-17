@@ -53,10 +53,6 @@ def main():
         # Selección del idioma
         idioma = st.selectbox("Selecciona un idioma para traducir:", ["Español", "Inglés", "Francés", "Chino", "Ruso"])
 
-        # Inicializar título en el estado de la sesión para evitar el error
-        if "title" not in st.session_state:
-            st.session_state.title = "Buscador de Ordenadores"
-
         if user_input:
             # Crear un cliente para el modelo del servicio de lenguaje en Azure
             language_client = ConversationAnalysisClient(
@@ -164,7 +160,7 @@ def main():
                     idioma_mapeado = {"Inglés": "en", "Francés": "fr", "Chino": "zh", "Ruso": "ru"}[idioma]
                     
                     # Traducir título
-                    translated_title = translate_text(st.session_state.title, idioma_mapeado, translation_endpoint, translation_key)
+                    translated_title = translate_text("Buscador de Ordenadores", idioma_mapeado, translation_endpoint, translation_key)
                     st.title(translated_title)
 
                     # Traducir resultados
