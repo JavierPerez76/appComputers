@@ -7,7 +7,7 @@ import re
 def translate_text(text, target_language, subscription_key, endpoint):
     try:
         # Construir la URL y el cuerpo de la solicitud
-        route = f"/translate?api-version=3.0&to={target_language}"
+        route = f"translate?api-version=3.0&to={target_language}"
         url = endpoint + route
 
         body = [{"Text": text}]
