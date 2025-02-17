@@ -4,4 +4,4 @@ azure-core
 azure-ai-language-questionanswering
 azure-ai-language-conversations
 pymongo
-azure-ai-translation-text
+PyMuPDF
