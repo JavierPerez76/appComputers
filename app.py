@@ -10,10 +10,7 @@ def parse_storage(almacenamiento):
     if match:
         value = float(match.group(1))
         unit = match.group(2).upper()
-        if unit == 'TB':
-            return int(value * 1000)  # Convertir TB a GB
-        elif unit == 'GB':
-            return int(value)
+        return int(value * 1000) if unit == 'TB' else int(value)
     return None
 
 def translate_text(text_list, target_language):
@@ -102,26 +99,33 @@ def main():
                         if valor != 'N/A':
                             caracteristicas.append(f"{key}: {valor}")
 
-                    # Mostrar las características originales
+                    # Convertir la lista en texto
                     caracteristicas_texto = "\n".join(caracteristicas)
-                    texto_mostrado = st.text_area("Características:", caracteristicas_texto, height=200)
+
+                    # Espacio para mostrar la traducción
+                    texto_traducido = st.text_area("Características:", caracteristicas_texto, height=200, key=f"texto_{doc['_id']}")
 
                     # Botones de traducción
                     col1, col2, col3, col4 = st.columns(4)
                     if col1.button("🇬🇧 Inglés", key=f"en_{doc['_id']}"):
                         traduccion = translate_text(caracteristicas, "en")
-                        texto_mostrado = "\n".join(traduccion)
+                        texto_traducido = "\n".join(traduccion)
+                        st.session_state[f"texto_{doc['_id']}"] = texto_traducido
                     if col2.button("🇫🇷 Francés", key=f"fr_{doc['_id']}"):
                         traduccion = translate_text(caracteristicas, "fr")
-                        texto_mostrado = "\n".join(traduccion)
+                        texto_traducido = "\n".join(traduccion)
+                        st.session_state[f"texto_{doc['_id']}"] = texto_traducido
                     if col3.button("🇨🇳 Chino", key=f"zh_{doc['_id']}"):
                         traduccion = translate_text(caracteristicas, "zh-Hans")
-                        texto_mostrado = "\n".join(traduccion)
+                        texto_traducido = "\n".join(traduccion)
+                        st.session_state[f"texto_{doc['_id']}"] = texto_traducido
                     if col4.button("🇷🇺 Ruso", key=f"ru_{doc['_id']}"):
                         traduccion = translate_text(caracteristicas, "ru")
-                        texto_mostrado = "\n".join(traduccion)
+                        texto_traducido = "\n".join(traduccion)
+                        st.session_state[f"texto_{doc['_id']}"] = texto_traducido
 
-                    st.text_area("Características traducidas:", texto_mostrado, height=200)
+                    # Mostrar el área de texto con la traducción aplicada
+                    st.text_area("Características traducidas:", st.session_state.get(f"texto_{doc['_id']}", caracteristicas_texto), height=200)
 
                     # PDF del producto
                     pdf_filename = f"{doc['_id'][:-4]}.pdf"
