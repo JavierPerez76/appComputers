@@ -92,6 +92,8 @@ def main():
             comparacion_almacenamiento = None
             almacenamiento = None
             color = None  # Añadimos una variable para el color
+            st.write(f"Consulta generada: {query}")
+
 
             for entity in entities:
                 if entity["category"] == "Pulgadas":
