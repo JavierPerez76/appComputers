@@ -92,8 +92,6 @@ def main():
             comparacion_almacenamiento = None
             almacenamiento = None
             color = None  # Añadimos una variable para el color
-            st.write(f"Consulta generada: {query}")
-
 
             for entity in entities:
                 if entity["category"] == "Pulgadas":
@@ -123,7 +121,6 @@ def main():
 
             if almacenamiento:
                 almacenamiento_int = parse_storage(almacenamiento)
-                st.write(f"Valor de almacenamiento procesado: {almacenamiento_int}")  # Imprimir valor de almacenamiento
                 if almacenamiento_int:
                     if comparacion_almacenamiento == "más de":
                         query["entities.Almacenamiento"] = {"$gt": almacenamiento_int}
@@ -131,6 +128,9 @@ def main():
                         query["entities.Almacenamiento"] = {"$lt": almacenamiento_int}
                     else:
                         query["entities.Almacenamiento"] = almacenamiento_int
+
+            # Mostrar la consulta generada para depuración
+            st.write(f"Consulta generada: {query}")
 
             results = list(collection.find(query))
 
