@@ -8,20 +8,20 @@ Quiero un ordenador de 14,4 pulgadas
 Quiero un ordenador de 13,5 pulgadas
 Busca un ordenador con 32GB de RAM
 Quiero un ordenador con 36GB de RAM
-Quiero un ordenador con el código 16Z90R-E.AD78B
-Quiero un ordenador con el código 17Z90R-E.AD78B
-Quiero un ordenador con el código 21KE002YSP
-Quiero un ordenador con el código 21KE003JSP
-Quiero un ordenador con el código 21KE003VSP
-Quiero un ordenador con el código DTPF3
-Quiero un ordenador con el código FMDDY
-Quiero un ordenador con el código GN4X0
-Quiero un ordenador con el código MX2G3Y_A
-Quiero un ordenador con el código NP960XGL-XG1ES
-Quiero un ordenador con el código NP960XGL-XG2ES
-Quiero un ordenador con el código Y6B-00005
-Quiero un ordenador con el código Z1T-00012
-Quiero un ordenador con el código ZKB-00012
+Quiero un ordenador con el codigo 16Z90R-E.AD78B
+Quiero un ordenador con el codigo 17Z90R-E.AD78B
+Quiero un ordenador con el codigo 21KE002YSP
+Quiero un ordenador con el codigo 21KE003JSP
+Quiero un ordenador con el codigo 21KE003VSP
+Quiero un ordenador con el codigo DTPF3
+Quiero un ordenador con el codigo FMDDY
+Quiero un ordenador con el codigo GN4X0
+Quiero un ordenador con el codigo MX2G3Y_A
+Quiero un ordenador con el codigo NP960XGL-XG1ES
+Quiero un ordenador con el codigo NP960XGL-XG2ES
+Quiero un ordenador con el codigo Y6B-00005
+Quiero un ordenador con el codigo Z1T-00012
+Quiero un ordenador con el codigo ZKB-00012
 Me gustaría un ordenador de 15 pulgadas
 Estoy buscando un ordenador de 17 pulgadas
 Quiero un ordenador con una pantalla de 14,5 pulgadas
@@ -32,17 +32,17 @@ Necesito un ordenador de 14,4 pulgadas
 Me gustaría un ordenador con pantalla de 13,5 pulgadas
 Encuentra un ordenador con 32GB de RAM
 Estoy buscando un ordenador con 36GB de RAM
-Quiero encontrar el ordenador con el código 16Z90R-E.AD78B
-Busco el ordenador con el código 17Z90R-E.AD78B
-Estoy buscando el ordenador con el código 21KE002YSP
-Encuentra el ordenador con el código 21KE003JSP
-Busco el ordenador con el código 21KE003VSP
-Quisiera encontrar el ordenador con el código DTPF3
-Estoy buscando el ordenador con el código FMDDY
-Encuentra el ordenador con el código GN4X0
-Busco el ordenador con el código MX2G3Y_A
-Encuentra el ordenador con el código NP960XGL-XG1ES
-Estoy buscando el ordenador con el código NP960XGL-XG2ES
-Quiero el ordenador con el código Y6B-00005
-Busco el ordenador con el código Z1T-00012
-Encuentra el ordenador con el código ZKB-00012
+Quiero encontrar el ordenador con el codigo 16Z90R-E.AD78B
+Busco el ordenador con el codigo 17Z90R-E.AD78B
+Estoy buscando el ordenador con el codigo 21KE002YSP
+Encuentra el ordenador con el codigo 21KE003JSP
+Busco el ordenador con el codigo 21KE003VSP
+Quisiera encontrar el ordenador con el codigo DTPF3
+Estoy buscando el ordenador con el codigo FMDDY
+Encuentra el ordenador con el codigo GN4X0
+Busco el ordenador con el codigo MX2G3Y_A
+Encuentra el ordenador con el codigo NP960XGL-XG1ES
+Estoy buscando el ordenador con el codigo NP960XGL-XG2ES
+Quiero el ordenador con el codigo Y6B-00005
+Busco el ordenador con el codigo Z1T-00012
+Encuentra el ordenador con el codigo ZKB-00012
