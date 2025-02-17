@@ -2,6 +2,7 @@ import streamlit as st
 from pymongo import MongoClient
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.language.conversations import ConversationAnalysisClient
+from azure.ai.translation.text import TextTranslationClient
 import re
 
 def parse_storage(almacenamiento):
@@ -15,6 +16,17 @@ def parse_storage(almacenamiento):
             return int(value)
     return None
 
+def translate_text(text, target_language, translation_endpoint, translation_key):
+    try:
+        translation_client = TextTranslationClient(
+            endpoint=translation_endpoint, credential=AzureKeyCredential(translation_key)
+        )
+        response = translation_client.translate(text=text, target_languages=[target_language])
+        return response[0].translations[0].text
+    except Exception as ex:
+        st.error(f"Error en la traducción: {ex}")
+        return text
+
 def main():
     try:
         # Cargar variables de entorno desde Streamlit Secrets
@@ -23,6 +35,8 @@ def main():
         mongodb_connection_string = st.secrets['mongodb_connection_string']
         blob_storage_url = st.secrets['blob_storage_url']
         sas_token = st.secrets['sas_token']
+        translation_endpoint = st.secrets['translation_endpoint']
+        translation_key = st.secrets['translation_key']
 
         # Conectar a MongoDB con la connection string
         client = MongoClient(mongodb_connection_string)  
@@ -33,6 +47,9 @@ def main():
 
         # Pedir entrada al usuario
         user_input = st.text_input("¿Qué tipo de ordenador buscas?", "")
+
+        # Selección del idioma
+        idioma = st.selectbox("Selecciona un idioma para traducir:", ["Inglés", "Francés", "Chino", "Ruso"])
 
         if user_input:
             # Crear un cliente para el modelo del servicio de lenguaje en Azure
@@ -137,7 +154,16 @@ def main():
                     st.write("---")
             else:
                 st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
-    
+
+            # Traducir todo el contenido a otro idioma
+            if idioma != "Español":
+                idioma_mapeado = {"Inglés": "en", "Francés": "fr", "Chino": "zh", "Ruso": "ru"}[idioma]
+                translated_title = translate_text(st.session_state.title, idioma_mapeado, translation_endpoint, translation_key)
+                st.title(translated_title)
+
+                translated_results = translate_text("\n".join(detalles), idioma_mapeado, translation_endpoint, translation_key)
+                st.write(translated_results)
+
     except Exception as ex:
         st.error(f"Error: {ex}")
 
