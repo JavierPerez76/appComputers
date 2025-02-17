@@ -1,33 +1,9 @@
+
 import streamlit as st
 from pymongo import MongoClient
-import requests
-import json
+from azure.core.credentials import AzureKeyCredential
+from azure.ai.language.conversations import ConversationAnalysisClient
 import re
-
-def translate_text(text, target_language, subscription_key, endpoint):
-    try:
-        # Construir la URL y el cuerpo de la solicitud
-        route = f"translate?api-version=3.0&to={target_language}"
-        url = endpoint + route
-
-        body = [{"Text": text}]
-        headers = {
-            'Ocp-Apim-Subscription-Key': subscription_key,
-            'Content-Type': 'application/json'
-        }
-
-        # Realizar la solicitud POST
-        response = requests.post(url, headers=headers, json=body)
-        response.raise_for_status()
-
-        # Obtener el texto traducido
-        response_json = response.json()
-        translated_text = response_json[0]['translations'][0]['text']
-        return translated_text
-
-    except Exception as ex:
-        st.error(f"Error al traducir: {ex}")
-        return text
 
 def parse_storage(almacenamiento):
     match = re.match(r'(\d+\.?\d*)\s*(GB|TB)', almacenamiento, re.IGNORECASE)
@@ -42,15 +18,15 @@ def parse_storage(almacenamiento):
 
 def main():
     try:
-        # Cargar claves de la aplicación desde Streamlit Secrets
-        translation_endpoint = st.secrets['azure_endpoint']
-        translation_key = st.secrets['azure_key']
+        # Cargar variables de entorno desde Streamlit Secrets
+        ls_prediction_endpoint = st.secrets['azure_endpoint']
+        ls_prediction_key = st.secrets['azure_key']
         mongodb_connection_string = st.secrets['mongodb_connection_string']
         blob_storage_url = st.secrets['blob_storage_url']
         sas_token = st.secrets['sas_token']
 
-        # Conectar a MongoDB
-        client = MongoClient(mongodb_connection_string)
+        # Conectar a MongoDB con la connection string
+        client = MongoClient(mongodb_connection_string)  
         db = client["mongodb"]
         collection = db["computer"]
 
@@ -58,16 +34,11 @@ def main():
 
         # Pedir entrada al usuario
         user_input = st.text_input("¿Qué tipo de ordenador buscas?", "")
-        target_language = st.selectbox("Selecciona un idioma para traducir:", ["es", "en", "fr", "de"])
 
         if user_input:
-            # Traducir el texto del usuario antes de realizar la búsqueda
-            translated_input = translate_text(user_input, target_language, translation_key, translation_endpoint)
-            st.write(f"Texto traducido: {translated_input}")
-
-            # Crear cliente para el modelo de Azure Language
+            # Crear un cliente para el modelo del servicio de lenguaje en Azure
             language_client = ConversationAnalysisClient(
-                translation_endpoint, AzureKeyCredential(translation_key)
+                ls_prediction_endpoint, AzureKeyCredential(ls_prediction_key)
             )
 
             cls_project = 'CLUordenadores'
@@ -82,8 +53,8 @@ def main():
                                 "participantId": "1",
                                 "id": "1",
                                 "modality": "text",
-                                "language": target_language,
-                                "text": translated_input
+                                "language": "es",
+                                "text": user_input
                             },
                             "isLoggingEnabled": False
                         },
@@ -103,7 +74,7 @@ def main():
             ram = None
             comparacion_almacenamiento = None
             almacenamiento = None
-            color = None
+            color = None  # Añadimos una variable para el color
 
             for entity in entities:
                 if entity["category"] == "Pulgadas":
@@ -118,7 +89,7 @@ def main():
                     almacenamiento = str(entity["text"]).split()[0]
                 elif entity["category"] == "ComparacionAlmacenamiento":
                     comparacion_almacenamiento = str(entity["text"]).lower()
-                elif entity["category"] == "Color":
+                elif entity["category"] == "Color":  # Detectar color
                     color = str(entity["text"]).lower()
 
             query = {}
@@ -128,7 +99,7 @@ def main():
                 query["entities.Marca"] = marca
             if ram:
                 query["entities.RAM"] = ram
-            if color:
+            if color:  # Si hay color, agregarlo a la consulta
                 query["entities.Color"] = color
 
             if almacenamiento:
@@ -146,8 +117,9 @@ def main():
             if results:
                 for doc in results:
                     modelo = doc['entities'].get("Modelo", "N/A")
-                    st.subheader(modelo)
+                    st.subheader(modelo)  # Mostrar el modelo en grande
 
+                    # Mostrar las propiedades como una lista ordenada
                     st.write("### Propiedades del Ordenador:")
                     detalles = []
                     for key in ["Marca", "Codigo", "Precio", "Almacenamiento", "RAM", "Pulgadas", "Procesador", "Color", "Grafica", "Garantia"]:
@@ -155,18 +127,20 @@ def main():
                         if valor != 'N/A':
                             detalles.append(f"- {key}: {valor}")
 
+                    # Mostrar las propiedades
                     st.write("\n".join(detalles))
 
-                    pdf_filename = f"{doc['_id'][:-4]}.pdf"
+                    # Mostrar el enlace para el PDF en una línea separada
+                    pdf_filename = f"{doc['_id'][:-4]}.pdf"  
                     pdf_url = f"{blob_storage_url}{pdf_filename}?{sas_token}"
                     st.markdown(f"[Ver PDF aquí]({pdf_url})", unsafe_allow_html=True)
 
                     st.write("---")
             else:
                 st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
-
+    
     except Exception as ex:
         st.error(f"Error: {ex}")
 
-if __name__ == "__main__":
+if __name__ == "__main__":  
     main()
