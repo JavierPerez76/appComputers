@@ -1,20 +1,8 @@
-import streamlit as st
-from pymongo import MongoClient
-from azure.core.credentials import AzureKeyCredential
 from azure.ai.language.conversations import ConversationAnalysisClient
-from azure.ai.translation.text import TextTranslationClient
-import re
-
-def parse_storage(almacenamiento):
-    match = re.match(r'(\d+\.?\d*)\s*(GB|TB)', almacenamiento, re.IGNORECASE)
-    if match:
-        value = float(match.group(1))
-        unit = match.group(2).upper()
-        if unit == 'TB':
-            return int(value * 1000)  # Convertir TB a GB
-        elif unit == 'GB':
-            return int(value)
-    return None
+from azure.core.credentials import AzureKeyCredential
+from pymongo import MongoClient
+from azure.ai.translation import TextTranslationClient
+import streamlit as st
 
 def translate_text(text, target_language, translation_endpoint, translation_key):
     try:
@@ -47,8 +35,8 @@ def main():
         translation_endpoint = st.secrets['translation_endpoint']
         translation_key = st.secrets['translation_key']
 
-        # Conectar a MongoDB con la connection string
-        client = MongoClient(mongodb_connection_string)  
+        # Conectar a MongoDB
+        client = MongoClient(mongodb_connection_string)
         db = client["mongodb"]
         collection = db["computer"]
 
@@ -56,9 +44,7 @@ def main():
 
         # Pedir entrada al usuario
         user_input = st.text_input("¿Qué tipo de ordenador buscas?", "")
-
-        # Selección del idioma
-        idioma = st.selectbox("Selecciona un idioma para traducir:", ["Español", "Inglés", "Francés", "Chino", "Ruso"])
+        target_language = st.selectbox("Selecciona un idioma para traducir:", ["Español", "Inglés", "Francés", "Chino", "Ruso"])
 
         if user_input:
             # Crear un cliente para el modelo del servicio de lenguaje en Azure
@@ -94,6 +80,8 @@ def main():
             top_intent = result["result"]["prediction"]["topIntent"]
             entities = result["result"]["prediction"]["entities"]
 
+            # Aquí defines cómo quieres construir la query con las entidades
+            query = {}
             pulgadas = None
             marca = None
             ram = None
@@ -117,7 +105,7 @@ def main():
                 elif entity["category"] == "Color":  # Detectar color
                     color = str(entity["text"]).lower()
 
-            query = {}
+            # Construir la query
             if pulgadas:
                 query["entities.Pulgadas"] = pulgadas
             if marca:
@@ -140,45 +128,34 @@ def main():
             results = list(collection.find(query))
 
             if results:
+                # Mostrar los resultados encontrados
                 for doc in results:
                     modelo = doc['entities'].get("Modelo", "N/A")
-                    st.subheader(modelo)  # Mostrar el modelo en grande
+                    st.subheader(modelo)  # Mostrar el modelo
 
-                    # Mostrar las propiedades como una lista ordenada
-                    st.write("### Propiedades del Ordenador:")
                     detalles = []
                     for key in ["Marca", "Codigo", "Precio", "Almacenamiento", "RAM", "Pulgadas", "Procesador", "Color", "Grafica", "Garantia"]:
                         valor = doc['entities'].get(key, 'N/A')
                         if valor != 'N/A':
                             detalles.append(f"- {key}: {valor}")
-
-                    # Mostrar las propiedades
                     st.write("\n".join(detalles))
 
-                    # Mostrar el enlace para el PDF en una línea separada
-                    pdf_filename = f"{doc['_id'][:-4]}.pdf"  
+                    # Traducir el modelo y los detalles si el usuario lo seleccionó
+                    if target_language != "Español":  # Evita traducir si el idioma es español
+                        for detail in detalles:
+                            translated_detail = translate_text(detail, target_language, translation_endpoint, translation_key)
+                            st.write(translated_detail)
+
+                    # Mostrar el enlace para el PDF
+                    pdf_filename = f"{doc['_id'][:-4]}.pdf"
                     pdf_url = f"{blob_storage_url}{pdf_filename}?{sas_token}"
                     st.markdown(f"[Ver PDF aquí]({pdf_url})", unsafe_allow_html=True)
-
                     st.write("---")
-
-                # Traducir los resultados si el idioma no es español
-                if idioma != "Español":
-                    idioma_mapeado = {"Inglés": "en", "Francés": "fr", "Chino": "zh", "Ruso": "ru"}[idioma]
-                    
-                    # Traducir título
-                    translated_title = translate_text("Buscador de Ordenadores", idioma_mapeado, translation_endpoint, translation_key)
-                    st.title(translated_title)
-
-                    # Traducir resultados
-                    translated_results = translate_text("\n".join(detalles), idioma_mapeado, translation_endpoint, translation_key)
-                    st.write(translated_results)
-
             else:
                 st.write("No se encontraron ordenadores que coincidan con tu búsqueda.")
 
     except Exception as ex:
         st.error(f"Error: {ex}")
 
-if __name__ == "__main__":  
+if __name__ == "__main__":
     main()
