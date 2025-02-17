@@ -1,9 +1,9 @@
 import streamlit as st
-import random
 from pymongo import MongoClient
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.language.conversations import ConversationAnalysisClient
 import re
+import random
 
 def parse_storage(almacenamiento):
     match = re.match(r'(\d+\.?\d*)\s*(GB|TB)', almacenamiento, re.IGNORECASE)
@@ -15,6 +15,15 @@ def parse_storage(almacenamiento):
         elif unit == 'GB':
             return int(value)
     return None
+
+def load_questions():
+    try:
+        with open('questions.txt', 'r', encoding='utf-8') as file:
+            questions = file.readlines()
+        return [q.strip() for q in questions]
+    except FileNotFoundError:
+        st.error("El archivo 'questions.txt' no se encuentra.")
+        return []
 
 def main():
     try:
@@ -30,27 +39,21 @@ def main():
         db = client["mongodb"]
         collection = db["computer"]
 
+        # Cargar preguntas desde el archivo questions.txt
+        questions = load_questions()
+
         st.title("Buscador de Ordenadores")
 
-        # Leer las preguntas desde el archivo
-        try:
-            with open("questions.txt", "r", encoding="utf-8") as file:
-                questions = file.readlines()
-            questions = [q.strip() for q in questions if q.strip()]
-        except Exception as e:
-            questions = []
-            st.error(f"Error cargando preguntas: {e}")
-
-        # Botón "Pregunta aleatoria"
-        if st.button("Random Question"):
+        # Botón para pregunta aleatoria
+        if st.button('Random Question'):
             if questions:
                 random_question = random.choice(questions)
-                st.session_state.user_input = random_question  # Mantener la pregunta en la caja de texto
+                st.text_input("¿Qué tipo de ordenador buscas?", value=random_question)
             else:
-                st.warning("No se han cargado preguntas.")
-
-        # Mostrar la caja de texto con la pregunta
-        user_input = st.text_input("¿Qué tipo de ordenador buscas?", value=getattr(st.session_state, "user_input", ""))
+                st.error("No se han cargado preguntas.")
+        
+        # Pedir entrada al usuario
+        user_input = st.text_input("¿Qué tipo de ordenador buscas?", "")
 
         if user_input:
             # Crear un cliente para el modelo del servicio de lenguaje en Azure
@@ -128,9 +131,6 @@ def main():
                         query["entities.Almacenamiento"] = {"$lt": almacenamiento_int}
                     else:
                         query["entities.Almacenamiento"] = almacenamiento_int
-
-            # Mostrar la consulta generada para depuración
-            st.write(f"Consulta generada: {query}")
 
             results = list(collection.find(query))
 
